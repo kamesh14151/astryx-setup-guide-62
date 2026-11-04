@@ -1,15 +1,15 @@
 'use client';
 
-import {useState} from 'react';
+import {useEffect, useState} from 'react';
 
-// ─── Gallery Data ───────────────────────────────────────────────────────────
+// ─── Types ──────────────────────────────────────────────────────────────────
 
 type Category = 'all' | 'lifestyle' | 'scene' | 'home';
 
 interface GalleryImage {
   src: string;
   alt: string;
-  category: Exclude<Category, 'all'>;
+  category: string;
 }
 
 const TABS: {value: Category; label: string}[] = [
@@ -19,21 +19,13 @@ const TABS: {value: Category; label: string}[] = [
   {value: 'home', label: 'Home'},
 ];
 
-// Put these files in /public/template-assets/ (same names as below).
-const GALLERY_IMAGES: GalleryImage[] = [
-  {src: '/template-assets/moody-scene-horizontal-1.png', alt: 'Moody mountain scene', category: 'scene'},
-  {src: '/template-assets/moody-lifestyle-vertical-1.png', alt: 'Moody lifestyle portrait', category: 'lifestyle'},
-  {src: '/template-assets/moody-home-vertical-1.png', alt: 'Moody home interior', category: 'home'},
-  {src: '/template-assets/moody-scene-horizontal-2.png', alt: 'Moody scene vista', category: 'scene'},
-  {src: '/template-assets/moody-lifestyle-vertical-2.png', alt: 'Moody lifestyle scene', category: 'lifestyle'},
-  {src: '/template-assets/moody-lifestyle-horizontal-1.png', alt: 'Moody lifestyle still life', category: 'lifestyle'},
-  {src: '/template-assets/moody-scene-vertical-1.png', alt: 'Moody town view', category: 'scene'},
-  {src: '/template-assets/moody-home-vertical-2.png', alt: 'Moody home wall', category: 'home'},
-  {src: '/template-assets/moody-home-horizontal-1.png', alt: 'Moody home lounge', category: 'home'},
-  {src: '/template-assets/moody-scene-vertical-2.png', alt: 'Moody beach view', category: 'scene'},
-];
+const ALT_BY_CATEGORY: Record<string, string> = {
+  lifestyle: 'Lifestyle photo',
+  scene: 'Scenery photo',
+  home: 'Home interior photo',
+};
 
-// ─── Image card (hides the broken-image icon if a file is missing) ──────────
+// ─── Image card ─────────────────────────────────────────────────────────────
 
 function GalleryCard({image}: {image: GalleryImage}) {
   const [failed, setFailed] = useState(false);
@@ -58,11 +50,33 @@ function GalleryCard({image}: {image: GalleryImage}) {
 
 export default function ClassicGalleryTemplate() {
   const [filter, setFilter] = useState<Category>('all');
+  const [images, setImages] = useState<GalleryImage[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  // Load the images that were uploaded on /upload (stored in Vercel Blob).
+  useEffect(() => {
+    let cancelled = false;
+    fetch('/api/gallery', {cache: 'no-store'})
+      .then(res => res.json())
+      .then(data => {
+        if (cancelled) return;
+        setImages(
+          (data.images ?? []).map((img: {url: string; category: string}) => ({
+            src: img.url,
+            alt: ALT_BY_CATEGORY[img.category] ?? 'Gallery photo',
+            category: img.category,
+          })),
+        );
+      })
+      .catch(() => {})
+      .finally(() => !cancelled && setLoading(false));
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   const filteredImages =
-    filter === 'all'
-      ? GALLERY_IMAGES
-      : GALLERY_IMAGES.filter(img => img.category === filter);
+    filter === 'all' ? images : images.filter(img => img.category === filter);
 
   return (
     <main className="min-h-screen w-full bg-background text-foreground">
@@ -109,11 +123,23 @@ export default function ClassicGalleryTemplate() {
         </header>
 
         {/* Gallery grid: 4 columns on desktop, fewer on smaller screens */}
-        <section className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-          {filteredImages.map(image => (
-            <GalleryCard key={image.src} image={image} />
-          ))}
-        </section>
+        {loading ? (
+          <section className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+            {Array.from({length: 8}).map((_, i) => (
+              <div key={i} className="aspect-[3/2] animate-pulse rounded-[20px] bg-muted" />
+            ))}
+          </section>
+        ) : filteredImages.length === 0 ? (
+          <p className="text-center text-muted-foreground">
+            No images yet. Add some on the /upload page.
+          </p>
+        ) : (
+          <section className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+            {filteredImages.map(image => (
+              <GalleryCard key={image.src} image={image} />
+            ))}
+          </section>
+        )}
       </div>
     </main>
   );
