@@ -155,6 +155,12 @@ export default function ContactPage() {
                     alt={`${BRAND} studio`}
                     style={illustrationImg}
                     onError={() => setImageFailed(true)}
+                    ref={el => {
+                      // Catches images that failed before the page hydrated.
+                      if (el && el.complete && el.naturalWidth === 0) {
+                        setImageFailed(true);
+                      }
+                    }}
                   />
                 )}
               </AspectRatio>

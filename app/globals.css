@@ -1,4 +1,9 @@
-@import 'tailwindcss';
+/* Tailwind without its preflight reset. Preflight sits in a later CSS layer
+   than Astryx's styles and wipes out component padding, borders and button
+   backgrounds. Astryx ships its own reset.css (imported in layout.tsx). */
+@layer theme, base, components, utilities;
+@import 'tailwindcss/theme.css' layer(theme);
+@import 'tailwindcss/utilities.css' layer(utilities);
 @import 'tw-animate-css';
 @import 'shadcn/tailwind.css';
 
