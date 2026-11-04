@@ -39,6 +39,10 @@ function GalleryCard({image}: {image: GalleryImage}) {
           alt={image.alt}
           loading="lazy"
           onError={() => setFailed(true)}
+          ref={el => {
+            // Catches images that failed before the page hydrated.
+            if (el && el.complete && el.naturalWidth === 0) setFailed(true);
+          }}
           className="absolute inset-0 h-full w-full object-cover"
         />
       )}

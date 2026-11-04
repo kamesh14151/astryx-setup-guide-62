@@ -15,6 +15,7 @@ import {Link} from '@astryxdesign/core/Link';
 import {Divider} from '@astryxdesign/core/Divider';
 import {Card} from '@astryxdesign/core/Card';
 import {Selector} from '@astryxdesign/core/Selector';
+import {BrandMark} from '../../components/brand';
 
 // ─── Brand settings: edit these ─────────────────────────────────────────────
 
@@ -135,9 +136,7 @@ export default function ContactPage() {
           <Grid columns={{minWidth: 320}} align="center" gap={10}>
             <VStack gap={6}>
               <VStack gap={3}>
-                <Text type="label" color="secondary">
-                  {BRAND}
-                </Text>
+                <BrandMark size={32} />
                 <Text type="display-1" as="h1">
                   Let&apos;s work together
                 </Text>
@@ -155,6 +154,12 @@ export default function ContactPage() {
                     alt={`${BRAND} studio`}
                     style={illustrationImg}
                     onError={() => setImageFailed(true)}
+                    ref={el => {
+                      // Catches images that failed before the page hydrated.
+                      if (el && el.complete && el.naturalWidth === 0) {
+                        setImageFailed(true);
+                      }
+                    }}
                   />
                 )}
               </AspectRatio>
@@ -287,9 +292,13 @@ export default function ContactPage() {
               ))}
             </Grid>
             <VStack hAlign="center">
-              <Text type="supporting" color="secondary">
-                © {new Date().getFullYear()} {BRAND}
-              </Text>
+              <HStack gap={2} vAlign="center">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img src="/aj-logo.svg" alt="" width={20} height={20} />
+                <Text type="supporting" color="secondary">
+                  © {new Date().getFullYear()} {BRAND}
+                </Text>
+              </HStack>
             </VStack>
           </VStack>
         </VStack>

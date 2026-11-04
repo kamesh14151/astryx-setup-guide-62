@@ -1,6 +1,6 @@
 'use client';
 
-import {useState} from 'react';
+import {useState, type CSSProperties} from 'react';
 import {useRouter} from 'next/navigation';
 import {VStack} from '@astryxdesign/core/Layout';
 import {Center} from '@astryxdesign/core/Center';
@@ -8,6 +8,20 @@ import {Text} from '@astryxdesign/core/Text';
 import {TextInput} from '@astryxdesign/core/TextInput';
 import {Button} from '@astryxdesign/core/Button';
 import {Card} from '@astryxdesign/core/Card';
+import {Link} from '@astryxdesign/core/Link';
+import {Divider} from '@astryxdesign/core/Divider';
+
+// Background photo from the template. Put the file at
+// /public/template-assets/building.png (or paste a Blob URL here).
+// If the file is missing, the soft gradient behind it is shown instead.
+const BG_URL = '/template-assets/building.png';
+
+const pageStyle: CSSProperties = {
+  minHeight: '100dvh',
+  backgroundImage: `url(${BG_URL}), linear-gradient(135deg, #f4e9e2, #e8e8e8)`,
+  backgroundSize: 'cover',
+  backgroundPosition: 'center',
+};
 
 export default function LoginPage() {
   const router = useRouter();
@@ -44,7 +58,7 @@ export default function LoginPage() {
   }
 
   return (
-    <Center axis="both" padding={6}>
+    <Center axis="both" padding={6} style={pageStyle}>
       <Card padding={8} width="100%" maxWidth={400}>
         <VStack gap={4} hAlign="stretch">
           <VStack gap={1} hAlign="center">
@@ -52,7 +66,7 @@ export default function LoginPage() {
               Welcome back
             </Text>
             <Text type="body" color="secondary" size="sm">
-              Sign in to upload or delete gallery images
+              Enter your details to sign in to your account
             </Text>
           </VStack>
 
@@ -86,6 +100,10 @@ export default function LoginPage() {
             />
           </VStack>
 
+          <Link href="/contact" size="sm" color="secondary" type="supporting">
+            Having trouble signing in?
+          </Link>
+
           <Button
             label="Sign in"
             variant="primary"
@@ -94,6 +112,25 @@ export default function LoginPage() {
             isDisabled={!canSubmit}
             onClick={handleSignIn}
           />
+
+          <Divider label="Or sign in with" />
+
+          {/* SSO is not connected yet, so this stays disabled. */}
+          <Button
+            label="Continue with SSO"
+            variant="secondary"
+            size="lg"
+            isDisabled
+          />
+
+          <VStack hAlign="center">
+            <Text type="supporting" color="secondary">
+              Don&apos;t have an account?{' '}
+              <Link href="/contact" type="supporting">
+                Request access
+              </Link>
+            </Text>
+          </VStack>
         </VStack>
       </Card>
     </Center>
