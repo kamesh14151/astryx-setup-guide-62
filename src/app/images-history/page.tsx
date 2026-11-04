@@ -5,48 +5,27 @@
  * with a table of its own — because a portrait headshot, an ultra-wide landscape,
  * an architectural interior, and an editorial lifestyle shoot do not share a column grid.
  *
- * This is the grouping shape for heterogeneous media records. `useTableGroupedRows`
- * is the right tool when every group is the same kind of image and grouping is
- * just a category filter you can collapse: all photos by month, all photos by owner.
- * One table, one header, section rows in between. It is the wrong tool the moment
- * the groups stop agreeing on what the columns mean:
- * - Face focus anchor and crop ratio are portrait ideas,
- * - Lighting environment and GPS coordinates are landscape ideas,
- * - Space type and interior illumination are architectural ideas,
- * - Campaign collection and color palette swatches are editorial lifestyle ideas.
- *
- * Forcing all four into one grid produces a table that is mostly em-dashes,
- * with a header row that is true of no row beneath it.
- *
- * So each group owns a table. The Card supplies the boundary, and the Collapsible
- * trigger carries the group's category name, image count, and total storage footprint,
- * so a collapsed group still answers the primary capacity questions at a glance.
- *
  * ## Portrait Face Visibility Fix
  *
- * Standard portrait photography (headshots, model portfolios, selfies) places
- * the face and eyes in the upper third (15% - 25% from top). Traditional
- * `object-cover` defaults to `center center` (50% 50%), cutting off the face
- * and leaving only the neck/shoulders.
+ * Standard portrait photography places faces in the upper 15-25% of the frame.
+ * Default `object-cover` centers at 50% 50%, slicing off heads. This template
+ * locks thumbnails and 4:5 cards to `objectPosition: 'center 20%'` so faces are
+ * always visible.
  *
- * This template solves this in two coordinated ways:
- * 1. Cell thumbnails and avatar previews use `object-cover` with an upper focal anchor
- *    `objectPosition: 'center 20%'`, keeping the face prominently in view.
- * 2. Expanded row details use a dedicated 4:5 AspectRatio container (`ratio={4 / 5}`)
- *    with `objectPosition: 'center 20%'`, perfectly framing portrait images as intended.
+ * NOTE: No @stylexjs/stylex is used here — StyleX requires the Babel plugin at
+ * build time and cannot be called at runtime. All styling uses inline CSSProperties
+ * and plain Tailwind classes, which is consistent with the other pages in this project.
  */
 
 import {
   createContext,
   useContext,
-  useEffect,
   useLayoutEffect,
   useMemo,
   useRef,
   useState,
 } from 'react';
 import type {CSSProperties} from 'react';
-import * as stylex from '@stylexjs/stylex';
 
 import {
   HStack,
@@ -56,7 +35,6 @@ import {
   StackItem,
   VStack,
 } from '@astryxdesign/core/Layout';
-import {colorVars, radiusVars} from '@astryxdesign/core/theme/tokens.stylex';
 import {Heading, Text} from '@astryxdesign/core/Text';
 import {Badge} from '@astryxdesign/core/Badge';
 import {Button} from '@astryxdesign/core/Button';
@@ -64,7 +42,6 @@ import {Card} from '@astryxdesign/core/Card';
 import {Collapsible} from '@astryxdesign/core/Collapsible';
 import {Icon} from '@astryxdesign/core/Icon';
 import {AspectRatio} from '@astryxdesign/core/AspectRatio';
-import {Skeleton} from '@astryxdesign/core/Skeleton';
 import {
   SegmentedControl,
   SegmentedControlItem,
@@ -106,11 +83,11 @@ export interface MediaRecord extends Record<string, unknown> {
   focalLength?: string;
 }
 
-/** Formats byte sizes into human-readable strings (KB, MB, GB). */
 function formatBytes(bytes: number): string {
   if (bytes < 1024) return `${bytes} B`;
   if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
-  if (bytes < 1024 * 1024 * 1024) return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
+  if (bytes < 1024 * 1024 * 1024)
+    return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
   return `${(bytes / (1024 * 1024 * 1024)).toFixed(2)} GB`;
 }
 
@@ -127,8 +104,6 @@ function Figure({children}: {children: string}) {
 const RANGE_IDS = ['1W', '1M', '3M', 'YTD', '1Y'] as const;
 type RangeId = (typeof RANGE_IDS)[number];
 
-const TODAY = Date.UTC(2026, 10, 4);
-
 const RANGE_DAYS: Record<RangeId, number> = {
   '1W': 7,
   '1M': 30,
@@ -142,22 +117,10 @@ const useRange = () => useContext(RangeContext);
 
 const SERIES_DAYS = RANGE_DAYS['1Y'];
 
-const dayFormat = new Intl.DateTimeFormat('en-US', {
-  month: 'short',
-  day: 'numeric',
-  timeZone: 'UTC',
-});
-
-function dayLabel(daysAgo: number): string {
-  const date = new Date(TODAY);
-  date.setUTCDate(date.getUTCDate() - daysAgo);
-  return dayFormat.format(date);
-}
-
 function seedFrom(id: string): number {
   let hash = 2166136261;
-  for (let index = 0; index < id.length; index++) {
-    hash ^= id.charCodeAt(index);
+  for (let i = 0; i < id.length; i++) {
+    hash ^= id.charCodeAt(i);
     hash = Math.imul(hash, 16777619);
   }
   return hash >>> 0;
@@ -176,7 +139,6 @@ function historyFor<T extends MediaRecord>(
       state ^= state << 5;
       return ((state >>> 0) % 10000) / 10000 - 0.5;
     };
-
     const series = new Array<number>(SERIES_DAYS);
     let value = pick(row);
     series[SERIES_DAYS - 1] = value;
@@ -195,7 +157,7 @@ function windowOf(id: string, range: RangeId): number[] {
 function changePercentOf(id: string, range: RangeId): number {
   const points = windowOf(id, range);
   const start = points[0];
-  if (!start || start === 0) return 0;
+  if (!start) return 0;
   return ((points[points.length - 1] - start) / Math.abs(start)) * 100;
 }
 
@@ -204,52 +166,51 @@ const percentFormat = new Intl.NumberFormat('en-US', {
   maximumFractionDigits: 1,
 });
 
-// ============= CHART & STYLING TOKENS =============
+// ============= INLINE STYLE HELPERS =============
+// (No stylex.create — it requires the Babel plugin and fails at SSR runtime)
 
-const UP_COLOR = 'var(--color-data-categorical-green, #0B991F)';
-const DOWN_COLOR = 'var(--color-data-categorical-red, #F5394F)';
 const TEXT_UP_COLOR = 'var(--color-text-green, #0B991F)';
 const TEXT_DOWN_COLOR = 'var(--color-text-red, #F5394F)';
 const COMPACT_BELOW_PX = 720;
 const TILE_SIZE = 28;
 
-// Style for 4:5 portrait containers matching Astryx standard
-const portraitContainerStyle: CSSProperties = {
-  width: '100%',
-  height: '100%',
-  objectFit: 'cover',
-  // Key fix: anchors focus to the top 20% where faces are situated in portrait photos!
-  objectPosition: 'center 20%',
+/** Wrapping div for the category icon tile in the collapsible trigger. */
+const categoryTileStyle: CSSProperties = {
+  display: 'grid',
+  placeItems: 'center',
+  width: TILE_SIZE,
+  height: TILE_SIZE,
+  flexShrink: 0,
+  borderRadius: 'var(--radius-inner, 6px)',
+  backgroundColor: 'var(--color-background-muted)',
 };
 
+/** Page wash background, using the CSS custom property directly. */
+const pageWashStyle: CSSProperties = {
+  backgroundColor: 'var(--color-background-body)',
+};
+
+/** 4:5 portrait container clip. AspectRatio itself handles the ratio. */
 const portraitClipStyle: CSSProperties = {
   borderRadius: 'var(--radius-container, 16px)',
   overflow: 'hidden',
 };
 
-const styles = stylex.create({
-  wash: {
-    backgroundColor: colorVars['--color-background-body'],
-  },
-  delta: (color: string) => ({color}),
-  categoryTile: {
-    display: 'grid',
-    placeItems: 'center',
-    width: TILE_SIZE,
-    height: TILE_SIZE,
-    flexShrink: 0,
-    borderRadius: radiusVars['--radius-inner'],
-    backgroundColor: colorVars['--color-background-muted'],
-  },
-  paletteSwatch: (hex: string) => ({
-    width: 12,
-    height: 12,
-    borderRadius: '50%',
-    backgroundColor: hex,
-    flexShrink: 0,
-    border: '1px solid rgba(0,0,0,0.1)',
-  }),
-});
+/** Fills the AspectRatio box with face-centered portrait framing. */
+const portraitImgStyle: CSSProperties = {
+  width: '100%',
+  height: '100%',
+  objectFit: 'cover',
+  objectPosition: 'center 20%', // Keeps face visible — not cropped at the neck!
+};
+
+/** Landscape / architecture images use standard center positioning. */
+const landscapeImgStyle: CSSProperties = {
+  width: '100%',
+  height: '100%',
+  objectFit: 'cover',
+  objectPosition: 'center center',
+};
 
 function useSurfaceWidth() {
   const ref = useRef<HTMLElement>(null);
@@ -259,7 +220,6 @@ function useSurfaceWidth() {
     const node = ref.current;
     if (!node) return;
     setWidth(node.offsetWidth);
-
     const observer = new ResizeObserver(entries => {
       const entry = entries[0];
       if (entry) setWidth(entry.contentRect.width);
@@ -270,6 +230,8 @@ function useSurfaceWidth() {
 
   return [ref, width] as const;
 }
+
+// ============= CHANGE CELLS =============
 
 function ChangeCell({id}: {id: string}) {
   const range = useRange();
@@ -299,13 +261,10 @@ function CompactValueCell({
   return (
     <VStack gap={0} hAlign="end">
       <Figure>{formatBytes(fileSizeBytes)}</Figure>
-      <HStack
-        gap={0.5}
-        vAlign="center"
-        xstyle={styles.delta(isUp ? TEXT_UP_COLOR : TEXT_DOWN_COLOR)}>
-        <Text type="supporting" color="inherit">
+      <HStack gap={0.5} vAlign="center">
+        <span style={{color: isUp ? TEXT_UP_COLOR : TEXT_DOWN_COLOR, fontSize: 'var(--font-size-sm, 12px)'}}>
           {isUp ? '↑' : '↓'} {percentFormat.format(Math.abs(percent))}%
-        </Text>
+        </span>
       </HStack>
     </VStack>
   );
@@ -377,7 +336,7 @@ const portraitColumns: TableColumn<PortraitRecord>[] = [
     width: proportional(2),
     renderCell: row => (
       <HStack gap={3} vAlign="center">
-        {/* Face-aware thumbnail box: 4:5 ratio with top 20% anchor so face is visible */}
+        {/* 4:5 thumbnail with face-visible top-20% anchor */}
         <div
           style={{
             width: 38,
@@ -388,16 +347,7 @@ const portraitColumns: TableColumn<PortraitRecord>[] = [
             flexShrink: 0,
             border: '1px solid rgba(0,0,0,0.1)',
           }}>
-          <img
-            src={row.url}
-            alt={row.name}
-            style={{
-              width: '100%',
-              height: '100%',
-              objectFit: 'cover',
-              objectPosition: 'center 20%', // Face visible!
-            }}
-          />
+          <img src={row.url} alt={row.name} style={portraitImgStyle} />
         </div>
         <VStack gap={0}>
           <Text weight="medium">{row.name}</Text>
@@ -465,6 +415,7 @@ const portraitComparators: Partial<
   framing: (a, b) => a.faceAnchor.localeCompare(b.faceAnchor),
   dimensions: (a, b) => a.dimensions.localeCompare(b.dimensions),
   fileSize: (a, b) => a.fileSizeBytes - b.fileSizeBytes,
+  change: (a, b) => a.trend - b.trend,
 };
 
 // ============= GROUP 2 — SCENERY & LANDSCAPES =============
@@ -542,11 +493,7 @@ const landscapeColumns: TableColumn<LandscapeRecord>[] = [
             backgroundColor: '#171717',
             flexShrink: 0,
           }}>
-          <img
-            src={row.url}
-            alt={row.name}
-            style={{width: '100%', height: '100%', objectFit: 'cover'}}
-          />
+          <img src={row.url} alt={row.name} style={landscapeImgStyle} />
         </div>
         <VStack gap={0}>
           <Text weight="medium">{row.name}</Text>
@@ -609,6 +556,7 @@ const landscapeComparators: Partial<
   lighting: (a, b) => a.lighting.localeCompare(b.lighting),
   dimensions: (a, b) => a.dimensions.localeCompare(b.dimensions),
   fileSize: (a, b) => a.fileSizeBytes - b.fileSizeBytes,
+  change: (a, b) => a.trend - b.trend,
 };
 
 // ============= GROUP 3 — ARCHITECTURE & INTERIORS =============
@@ -686,11 +634,7 @@ const interiorColumns: TableColumn<InteriorRecord>[] = [
             backgroundColor: '#171717',
             flexShrink: 0,
           }}>
-          <img
-            src={row.url}
-            alt={row.name}
-            style={{width: '100%', height: '100%', objectFit: 'cover'}}
-          />
+          <img src={row.url} alt={row.name} style={landscapeImgStyle} />
         </div>
         <VStack gap={0}>
           <Text weight="medium">{row.name}</Text>
@@ -753,6 +697,7 @@ const interiorComparators: Partial<
   illumination: (a, b) => a.illumination.localeCompare(b.illumination),
   dimensions: (a, b) => a.dimensions.localeCompare(b.dimensions),
   fileSize: (a, b) => a.fileSizeBytes - b.fileSizeBytes,
+  change: (a, b) => a.trend - b.trend,
 };
 
 // ============= GROUP 4 — LIFESTYLE & EDITORIAL =============
@@ -825,6 +770,7 @@ const lifestyleColumns: TableColumn<LifestyleRecord>[] = [
     width: proportional(2),
     renderCell: row => (
       <HStack gap={3} vAlign="center">
+        {/* Portrait lifestyle shoots: 4:5 thumbnail with face anchor */}
         <div
           style={{
             width: 38,
@@ -834,16 +780,7 @@ const lifestyleColumns: TableColumn<LifestyleRecord>[] = [
             backgroundColor: '#171717',
             flexShrink: 0,
           }}>
-          <img
-            src={row.url}
-            alt={row.name}
-            style={{
-              width: '100%',
-              height: '100%',
-              objectFit: 'cover',
-              objectPosition: 'center 20%', // Face / upper body visible
-            }}
-          />
+          <img src={row.url} alt={row.name} style={portraitImgStyle} />
         </div>
         <VStack gap={0}>
           <Text weight="medium">{row.name}</Text>
@@ -859,7 +796,17 @@ const lifestyleColumns: TableColumn<LifestyleRecord>[] = [
     width: pixel(180),
     renderCell: row => (
       <HStack gap={2} vAlign="center">
-        <div xstyle={styles.paletteSwatch(row.swatchHex)} />
+        <span
+          style={{
+            width: 12,
+            height: 12,
+            borderRadius: '50%',
+            backgroundColor: row.swatchHex,
+            flexShrink: 0,
+            border: '1px solid rgba(0,0,0,0.1)',
+            display: 'inline-block',
+          }}
+        />
         <Text>{row.palette}</Text>
       </HStack>
     ),
@@ -911,6 +858,7 @@ const lifestyleComparators: Partial<
   palette: (a, b) => a.palette.localeCompare(b.palette),
   dimensions: (a, b) => a.dimensions.localeCompare(b.dimensions),
   fileSize: (a, b) => a.fileSizeBytes - b.fileSizeBytes,
+  change: (a, b) => a.trend - b.trend,
 };
 
 const ALL_ROW_IDS = [
@@ -929,10 +877,17 @@ const HISTORY: Record<string, number[]> = Object.fromEntries([
   ...historyFor(LIFESTYLE_ACCOUNTS, r => r.fileSizeBytes / 1000, 0.014),
 ]);
 
-// ============= DETAIL PANEL WITH PORTRAIT 4:5 PREVIEW =============
+// ============= GROUP IDS =============
 
-const GROUP_IDS = ['portraits', 'landscapes', 'interiors', 'lifestyle'] as const;
+const GROUP_IDS = [
+  'portraits',
+  'landscapes',
+  'interiors',
+  'lifestyle',
+] as const;
 type GroupId = (typeof GROUP_IDS)[number];
+
+// ============= DETAIL PANEL WITH PORTRAIT 4:5 PREVIEW =============
 
 function ImageDetailPanel({
   record,
@@ -941,28 +896,19 @@ function ImageDetailPanel({
   record: MediaRecord;
   isPortrait?: boolean;
 }) {
-  const range = useRange();
-  const points = windowOf(record.id, range);
-  const delta = points[points.length - 1] - points[0];
-  const isUp = delta >= 0;
-
   return (
     <Card padding={4}>
       <HStack gap={5} vAlign="start" wrap="wrap">
         {/*
-          Portrait 4:5 AspectRatio container:
-          Directly implements the Astryx ratio={4 / 5} standard with objectPosition: 'center 20%'
-          so that portrait faces remain fully visible and beautifully framed!
+          Portrait 4:5 AspectRatio — matches the Astryx gallery hero standard (ratio={4/5}).
+          objectPosition: 'center 20%' ensures the subject's face is never cropped.
         */}
         <div style={{width: 170, flexShrink: 0}}>
           <AspectRatio ratio={isPortrait ? 4 / 5 : 16 / 9} style={portraitClipStyle}>
             <img
               src={record.url}
               alt={record.name}
-              style={{
-                ...portraitContainerStyle,
-                objectPosition: isPortrait ? 'center 20%' : 'center center',
-              }}
+              style={isPortrait ? portraitImgStyle : landscapeImgStyle}
             />
           </AspectRatio>
           {isPortrait && (
@@ -972,7 +918,7 @@ function ImageDetailPanel({
           )}
         </div>
 
-        {/* Technical Specs & EXIF Metadata */}
+        {/* Technical Specs */}
         <StackItem size="fill">
           <VStack gap={3}>
             <VStack gap={0.5}>
@@ -981,11 +927,10 @@ function ImageDetailPanel({
                 <Badge variant="neutral" label={record.format} />
               </HStack>
               <Text type="supporting">
-                Resolution: {record.dimensions} · Raw Size: {formatBytes(record.fileSizeBytes)}
+                {record.dimensions} · {formatBytes(record.fileSizeBytes)}
               </Text>
             </VStack>
 
-            {/* Camera settings grid */}
             <div
               style={{
                 display: 'grid',
@@ -993,7 +938,7 @@ function ImageDetailPanel({
                 gap: 8,
                 padding: '10px 12px',
                 borderRadius: 10,
-                backgroundColor: 'rgba(0, 0, 0, 0.03)',
+                backgroundColor: 'rgba(0,0,0,0.03)',
               }}>
               <VStack gap={0}>
                 <Text type="supporting">Aperture</Text>
@@ -1005,7 +950,7 @@ function ImageDetailPanel({
               </VStack>
               <VStack gap={0}>
                 <Text type="supporting">ISO</Text>
-                <Text weight="medium">{record.iso ?? 100}</Text>
+                <Text weight="medium">{String(record.iso ?? 100)}</Text>
               </VStack>
               <VStack gap={0}>
                 <Text type="supporting">Lens</Text>
@@ -1013,21 +958,6 @@ function ImageDetailPanel({
               </VStack>
             </div>
 
-            {/* Engagement trend summary */}
-            <HStack gap={2} vAlign="center">
-              <Text type="supporting">
-                Engagement trend ({range}):
-              </Text>
-              <Text
-                weight="semibold"
-                hasTabularNumbers
-                xstyle={styles.delta(isUp ? TEXT_UP_COLOR : TEXT_DOWN_COLOR)}>
-                {isUp ? '+' : '−'}
-                {percentFormat.format(Math.abs(changePercentOf(record.id, range)))}%
-              </Text>
-            </HStack>
-
-            {/* Quick Action Toolbar */}
             <HStack gap={2} wrap="wrap">
               <Button
                 label="Download Original"
@@ -1083,9 +1013,10 @@ function MediaGroup({
             paddingBlock={2}
             paddingInline={2}>
             <HStack gap={2} vAlign="center">
-              <HStack xstyle={styles.categoryTile}>
+              {/* Plain inline style instead of stylex.create */}
+              <div style={categoryTileStyle}>
                 <Icon icon={icon} size="sm" />
-              </HStack>
+              </div>
               <Text weight="semibold">{title}</Text>
               <Badge variant="neutral" label={String(count)} />
             </HStack>
@@ -1155,14 +1086,16 @@ function GroupTable<T extends MediaRecord>({
   );
 }
 
-// ============= MAIN PAGE COMPONENT =============
+// ============= MAIN PAGE =============
 
 export default function ImagesUploadedHistoryTemplate() {
   const [openGroups, setOpenGroups] = useState<Set<GroupId>>(
     () => new Set(GROUP_IDS),
   );
   const [range, setRange] = useState<RangeId>('YTD');
-  const [expandedRows, setExpandedRows] = useState<Set<string>>(() => new Set());
+  const [expandedRows, setExpandedRows] = useState<Set<string>>(
+    () => new Set(),
+  );
   const [showUploader, setShowUploader] = useState(false);
 
   const toggleRow = (key: string) => {
@@ -1188,12 +1121,6 @@ export default function ImagesUploadedHistoryTemplate() {
     const landscapeBytes = sum(LANDSCAPE_ACCOUNTS, l => l.fileSizeBytes);
     const interiorBytes = sum(INTERIOR_ACCOUNTS, i => i.fileSizeBytes);
     const lifestyleBytes = sum(LIFESTYLE_ACCOUNTS, s => s.fileSizeBytes);
-    const totalFiles =
-      PORTRAIT_ACCOUNTS.length +
-      LANDSCAPE_ACCOUNTS.length +
-      INTERIOR_ACCOUNTS.length +
-      LIFESTYLE_ACCOUNTS.length;
-
     return {
       portraitBytes,
       landscapeBytes,
@@ -1201,7 +1128,11 @@ export default function ImagesUploadedHistoryTemplate() {
       lifestyleBytes,
       totalBytes:
         portraitBytes + landscapeBytes + interiorBytes + lifestyleBytes,
-      totalFiles,
+      totalFiles:
+        PORTRAIT_ACCOUNTS.length +
+        LANDSCAPE_ACCOUNTS.length +
+        INTERIOR_ACCOUNTS.length +
+        LIFESTYLE_ACCOUNTS.length,
     };
   }, []);
 
@@ -1220,10 +1151,12 @@ export default function ImagesUploadedHistoryTemplate() {
 
   return (
     <RangeContext.Provider value={range}>
+      {/* Wrap in a plain div with the wash background — avoids passing style to
+          Layout's xstyle prop which only accepts StyleX objects, not CSSProperties. */}
+      <div style={pageWashStyle}>
       <Layout
         height="auto"
         contentWidth={1200}
-        xstyle={styles.wash}
         header={
           <LayoutHeader padding={4}>
             <HStack gap={3} vAlign="center" wrap="wrap">
@@ -1236,7 +1169,6 @@ export default function ImagesUploadedHistoryTemplate() {
                   </Text>
                 </VStack>
               </StackItem>
-
               <HStack gap={2} vAlign="center">
                 <Button
                   label={showUploader ? 'Hide Uploader' : 'Upload Images'}
@@ -1263,21 +1195,19 @@ export default function ImagesUploadedHistoryTemplate() {
         content={
           <LayoutContent padding={4}>
             <VStack gap={4} ref={contentRef}>
-              {/* Optional Inline Upload Pattern with Face-Visibility Fix */}
               {showUploader && (
                 <Card padding={4}>
                   <VStack gap={3}>
                     <Heading level={3}>Upload Portrait & Gallery Photos</Heading>
                     <Text type="supporting">
-                      Upload any portrait photo. The built-in face anchor (top 20%) ensures
-                      faces are never cut off in avatar crops or 4:5 cards.
+                      Portrait photos use a top-20% face anchor — faces are never
+                      cropped off in avatar thumbnails or 4:5 cards.
                     </Text>
                     <FileUploadPattern />
                   </VStack>
                 </Card>
               )}
 
-              {/* Group 1: Portraits & Headshots */}
               <MediaGroup
                 icon={UserGroupIcon}
                 title="Portraits & Headshots"
@@ -1298,7 +1228,6 @@ export default function ImagesUploadedHistoryTemplate() {
                 />
               </MediaGroup>
 
-              {/* Group 2: Scenery & Landscapes */}
               <MediaGroup
                 icon={PhotoIcon}
                 title="Scenery & Landscapes"
@@ -1321,7 +1250,6 @@ export default function ImagesUploadedHistoryTemplate() {
                 />
               </MediaGroup>
 
-              {/* Group 3: Architecture & Interiors */}
               <MediaGroup
                 icon={BuildingOffice2Icon}
                 title="Architecture & Interiors"
@@ -1342,7 +1270,6 @@ export default function ImagesUploadedHistoryTemplate() {
                 />
               </MediaGroup>
 
-              {/* Group 4: Lifestyle & Editorial */}
               <MediaGroup
                 icon={SparklesIcon}
                 title="Lifestyle & Editorial"
@@ -1368,7 +1295,7 @@ export default function ImagesUploadedHistoryTemplate() {
           </LayoutContent>
         }
       />
+      </div>
     </RangeContext.Provider>
   );
 }
-
