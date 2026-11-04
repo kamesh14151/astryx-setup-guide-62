@@ -1,0 +1,10 @@
+pmOnFail: ignore
+
+minimumReleaseAgeExclude:
+  - '@next/*'
+  - next
+
+allowBuilds:
+  '@astryxdesign/cli': set this to true or false
+
+dangerouslyAllowAllBuilds: true
