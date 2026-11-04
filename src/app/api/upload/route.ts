@@ -1,5 +1,6 @@
 import {NextResponse} from 'next/server';
 import {handleUpload, type HandleUploadBody} from '@vercel/blob/client';
+import {isAuthenticated} from '../../../lib/auth';
 
 const CATEGORIES = ['lifestyle', 'scene', 'home'];
 
@@ -12,10 +13,9 @@ export async function POST(request: Request) {
     const json = await handleUpload({
       body,
       request,
-      onBeforeGenerateToken: async (pathname, clientPayload) => {
-        const {password} = JSON.parse(clientPayload || '{}');
-        if (!process.env.UPLOAD_PASSWORD || password !== process.env.UPLOAD_PASSWORD) {
-          throw new Error('Wrong password');
+      onBeforeGenerateToken: async pathname => {
+        if (!(await isAuthenticated())) {
+          throw new Error('Unauthorized');
         }
 
         // Only allow gallery/<category>/<file>
@@ -36,6 +36,7 @@ export async function POST(request: Request) {
     });
     return NextResponse.json(json);
   } catch (error) {
-    return NextResponse.json({error: (error as Error).message}, {status: 400});
+    const message = (error as Error).message;
+    return NextResponse.json({error: message}, {status: message === 'Unauthorized' ? 401 : 400});
   }
 }

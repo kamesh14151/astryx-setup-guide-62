@@ -1,6 +1,7 @@
 'use client';
 
 import {useCallback, useEffect, useState} from 'react';
+import {useRouter} from 'next/navigation';
 import {upload} from '@vercel/blob/client';
 
 type Category = 'lifestyle' | 'scene' | 'home';
@@ -18,7 +19,7 @@ const CATEGORY_OPTIONS: {value: Category; label: string}[] = [
 ];
 
 export default function UploadPage() {
-  const [password, setPassword] = useState('');
+  const router = useRouter();
   const [category, setCategory] = useState<Category>('scene');
   const [files, setFiles] = useState<File[]>([]);
   const [status, setStatus] = useState<string>('');
@@ -36,18 +37,13 @@ export default function UploadPage() {
   }, []);
 
   useEffect(() => {
-    // Remember the password for this browser tab only.
-    const saved = sessionStorage.getItem('upload-password');
-    if (saved) setPassword(saved);
     refresh();
   }, [refresh]);
 
   async function handleUpload() {
-    if (!password) return setStatus('Enter the password first.');
     if (files.length === 0) return setStatus('Choose at least one image.');
 
     setBusy(true);
-    sessionStorage.setItem('upload-password', password);
     let done = 0;
 
     try {
@@ -56,7 +52,6 @@ export default function UploadPage() {
         await upload(`gallery/${category}/${file.name}`, file, {
           access: 'public',
           handleUploadUrl: '/api/upload',
-          clientPayload: JSON.stringify({password}),
           multipart: file.size > 8 * 1024 * 1024, // faster for big files
         });
         done++;
@@ -65,21 +60,29 @@ export default function UploadPage() {
       setFiles([]);
       await refresh();
     } catch (err) {
-      setStatus(`Failed after ${done} upload(s): ${(err as Error).message}`);
+      const message = (err as Error).message;
+      if (message.includes('Unauthorized')) {
+        router.push('/login');
+        return;
+      }
+      setStatus(`Failed after ${done} upload(s): ${message}`);
     } finally {
       setBusy(false);
     }
   }
 
   async function handleDelete(url: string) {
-    if (!password) return setStatus('Enter the password to delete.');
     if (!confirm('Delete this image?')) return;
 
     const res = await fetch('/api/delete', {
       method: 'POST',
       headers: {'Content-Type': 'application/json'},
-      body: JSON.stringify({password, url}),
+      body: JSON.stringify({url}),
     });
+    if (res.status === 401) {
+      router.push('/login');
+      return;
+    }
     if (!res.ok) {
       const data = await res.json().catch(() => ({}));
       return setStatus(data.error ?? 'Delete failed');
@@ -88,27 +91,31 @@ export default function UploadPage() {
     await refresh();
   }
 
+  async function handleSignOut() {
+    await fetch('/api/logout', {method: 'POST'});
+    router.push('/login');
+    router.refresh();
+  }
+
   return (
     <main className="min-h-screen w-full bg-background text-foreground">
       <div className="mx-auto flex w-full max-w-[900px] flex-col gap-10 px-6 py-16">
-        <header className="flex flex-col gap-2">
-          <h1 className="text-[28px] font-semibold tracking-tight">Upload gallery images</h1>
-          <p className="text-muted-foreground">
-            Pick a category, choose your photos, and they appear on the gallery page right away.
-          </p>
+        <header className="flex items-start justify-between gap-4">
+          <div className="flex flex-col gap-2">
+            <h1 className="text-[28px] font-semibold tracking-tight">Upload gallery images</h1>
+            <p className="text-muted-foreground">
+              Pick a category, choose your photos, and they appear on the gallery page right away.
+            </p>
+          </div>
+          <button
+            type="button"
+            onClick={handleSignOut}
+            className="shrink-0 rounded-xl bg-muted px-4 py-2 text-base text-foreground transition-colors hover:bg-muted/70">
+            Sign out
+          </button>
         </header>
 
         <section className="flex flex-col gap-5 rounded-[20px] border border-border p-6">
-          <label className="flex flex-col gap-2 text-sm font-medium">
-            Password
-            <input
-              type="password"
-              value={password}
-              onChange={e => setPassword(e.target.value)}
-              className="rounded-xl border border-input bg-background px-4 py-2.5 text-base font-normal outline-none focus:ring-2 focus:ring-ring"
-            />
-          </label>
-
           <div className="flex flex-col gap-2 text-sm font-medium">
             Category
             <div className="flex flex-wrap gap-2">
