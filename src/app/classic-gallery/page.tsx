@@ -1,6 +1,7 @@
 'use client';
 
 import {useEffect, useState} from 'react';
+import Link from 'next/link';
 
 // ─── Types ──────────────────────────────────────────────────────────────────
 
@@ -29,9 +30,14 @@ const ALT_BY_CATEGORY: Record<string, string> = {
 
 function GalleryCard({image}: {image: GalleryImage}) {
   const [failed, setFailed] = useState(false);
+  const isPortrait = image.category === 'lifestyle';
 
   return (
-    <div className="relative aspect-[3/2] overflow-hidden rounded-[20px] bg-gradient-to-br from-neutral-800 to-neutral-950">
+    <div
+      className={[
+        'relative overflow-hidden rounded-[20px] bg-gradient-to-br from-neutral-800 to-neutral-950 transition-all duration-300 hover:shadow-lg',
+        isPortrait ? 'aspect-[4/5]' : 'aspect-[3/2]',
+      ].join(' ')}>
       {!failed && (
         // eslint-disable-next-line @next/next/no-img-element
         <img
@@ -43,7 +49,11 @@ function GalleryCard({image}: {image: GalleryImage}) {
             // Catches images that failed before the page hydrated.
             if (el && el.complete && el.naturalWidth === 0) setFailed(true);
           }}
-          className="absolute inset-0 h-full w-full object-cover"
+          className={[
+            'absolute inset-0 h-full w-full object-cover transition-transform duration-300 hover:scale-105',
+            // Locks upper 20% anchor for portraits so faces stay visible:
+            isPortrait ? 'object-[center_20%]' : 'object-center',
+          ].join(' ')}
         />
       )}
     </div>
@@ -84,7 +94,24 @@ export default function ClassicGalleryTemplate() {
 
   return (
     <main className="min-h-screen w-full bg-background text-foreground">
-      <div className="mx-auto flex w-full max-w-[1200px] flex-col gap-12 px-6 py-16">
+      <div className="mx-auto flex w-full max-w-[1200px] flex-col gap-12 px-6 py-12">
+        {/* Top bar */}
+        <div className="flex items-center justify-between border-b border-border/40 pb-4">
+          <span className="text-sm font-medium tracking-tight">Classic Gallery</span>
+          <div className="flex items-center gap-3">
+            <Link
+              href="/images-history"
+              className="rounded-lg px-3 py-1.5 text-xs font-medium text-muted-foreground transition-colors hover:bg-muted hover:text-foreground">
+              Images History
+            </Link>
+            <Link
+              href="/upload"
+              className="rounded-lg bg-foreground px-3 py-1.5 text-xs font-medium text-background transition-opacity hover:opacity-90">
+              Upload
+            </Link>
+          </div>
+        </div>
+
         {/* Header */}
         <header className="mx-auto flex max-w-[680px] flex-col items-center gap-8 text-center">
           <div className="flex flex-col items-center gap-3">

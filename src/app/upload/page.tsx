@@ -2,7 +2,9 @@
 
 import {useCallback, useEffect, useState} from 'react';
 import {useRouter} from 'next/navigation';
+import Link from 'next/link';
 import {upload} from '@vercel/blob/client';
+import {Pattern as FileUploadPattern} from '@/components/file-upload-pattern';
 
 type Category = 'lifestyle' | 'scene' | 'home';
 
@@ -107,12 +109,19 @@ export default function UploadPage() {
               Pick a category, choose your photos, and they appear on the gallery page right away.
             </p>
           </div>
-          <button
-            type="button"
-            onClick={handleSignOut}
-            className="shrink-0 rounded-xl bg-muted px-4 py-2 text-base text-foreground transition-colors hover:bg-muted/70">
-            Sign out
-          </button>
+          <div className="flex items-center gap-2">
+            <Link
+              href="/images-history"
+              className="shrink-0 rounded-xl border border-border bg-background px-4 py-2 text-base font-medium text-foreground transition-colors hover:bg-muted">
+              View History
+            </Link>
+            <button
+              type="button"
+              onClick={handleSignOut}
+              className="shrink-0 rounded-xl bg-muted px-4 py-2 text-base text-foreground transition-colors hover:bg-muted/70">
+              Sign out
+            </button>
+          </div>
         </header>
 
         <section className="flex flex-col gap-5 rounded-[20px] border border-border p-6">
@@ -166,23 +175,45 @@ export default function UploadPage() {
         </section>
 
         <section className="flex flex-col gap-4">
-          <h2 className="text-xl font-semibold">Uploaded images ({images.length})</h2>
-          <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4">
-            {images.map(img => (
-              <div key={img.url} className="group relative aspect-[3/2] overflow-hidden rounded-2xl bg-muted">
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src={img.url} alt={img.pathname} className="h-full w-full object-cover" />
-                <span className="absolute left-2 top-2 rounded-full bg-black/60 px-2 py-0.5 text-xs text-white">
-                  {img.category}
-                </span>
-                <button
-                  type="button"
-                  onClick={() => handleDelete(img.url)}
-                  className="absolute right-2 top-2 rounded-full bg-black/60 px-2 py-0.5 text-xs text-white opacity-0 transition-opacity group-hover:opacity-100">
-                  Delete
-                </button>
-              </div>
-            ))}
+          <div className="flex items-center justify-between">
+            <h2 className="text-xl font-semibold">Uploaded images ({images.length})</h2>
+            <span className="text-xs text-muted-foreground">
+              Portraits displayed in 4:5 with face-centering
+            </span>
+          </div>
+          <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4">
+            {images.map(img => {
+              const isPortraitCategory = img.category === 'lifestyle';
+              return (
+                <div
+                  key={img.url}
+                  className={[
+                    'group relative overflow-hidden rounded-2xl bg-muted border border-border shadow-xs transition-transform duration-200 hover:scale-[1.01]',
+                    isPortraitCategory ? 'aspect-[4/5]' : 'aspect-[3/2]',
+                  ].join(' ')}>
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img
+                    src={img.url}
+                    alt={img.pathname}
+                    className={[
+                      'h-full w-full object-cover transition-transform duration-300 group-hover:scale-105',
+                      // Face-visible position for portraits:
+                      isPortraitCategory ? 'object-[center_20%]' : 'object-center',
+                    ].join(' ')}
+                  />
+                  <span className="absolute left-2 top-2 rounded-full bg-black/60 px-2 py-0.5 text-xs text-white backdrop-blur-xs">
+                    {img.category}
+                    {isPortraitCategory ? ' · 4:5 Face' : ''}
+                  </span>
+                  <button
+                    type="button"
+                    onClick={() => handleDelete(img.url)}
+                    className="absolute right-2 top-2 rounded-full bg-red-600/80 px-2 py-0.5 text-xs text-white opacity-0 transition-opacity group-hover:opacity-100 hover:bg-red-600">
+                    Delete
+                  </button>
+                </div>
+              );
+            })}
           </div>
         </section>
       </div>
