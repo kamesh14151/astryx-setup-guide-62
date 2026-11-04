@@ -1,12 +1,13 @@
 import {NextResponse} from 'next/server';
 import {del} from '@vercel/blob';
+import {isAuthenticated} from '../../../lib/auth';
 
 export async function POST(request: Request) {
-  const {password, url} = (await request.json()) as {password?: string; url?: string};
-
-  if (!process.env.UPLOAD_PASSWORD || password !== process.env.UPLOAD_PASSWORD) {
-    return NextResponse.json({error: 'Wrong password'}, {status: 401});
+  if (!(await isAuthenticated())) {
+    return NextResponse.json({error: 'Unauthorized'}, {status: 401});
   }
+
+  const {url} = (await request.json()) as {url?: string};
   if (!url || !url.includes('blob.vercel-storage.com')) {
     return NextResponse.json({error: 'Invalid url'}, {status: 400});
   }
