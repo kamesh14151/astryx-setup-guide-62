@@ -7,7 +7,6 @@ import {VStack, Layout, LayoutContent} from '@astryxdesign/core/Layout';
 import {Center} from '@astryxdesign/core/Center';
 import {Text, Heading} from '@astryxdesign/core/Text';
 import {Section} from '@astryxdesign/core/Section';
-import {TabList, Tab} from '@astryxdesign/core/TabList';
 
 // ─── Styles ─────────────────────────────────────────────────────────────────
 
@@ -50,6 +49,28 @@ const imgFill: CSSProperties = {
   width: '100%',
   height: '100%',
   objectFit: 'cover',
+};
+const filterRow: CSSProperties = {
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'center',
+  gap: 'var(--spacing-6)',
+  marginTop: 'var(--spacing-2)',
+};
+const filterButton: CSSProperties = {
+  border: 0,
+  background: 'transparent',
+  color: '#555b66',
+  cursor: 'pointer',
+  font: 'inherit',
+  fontSize: '1.05rem',
+  padding: '0.65rem 0',
+};
+const activeFilterButton: CSSProperties = {
+  ...filterButton,
+  color: '#111214',
+  fontWeight: 600,
+  borderBottom: '2px solid #111214',
 };
 
 // ─── Gallery Data ───────────────────────────────────────────────────────────
@@ -134,7 +155,7 @@ export default function ClassicGalleryTemplate() {
             <VStack gap={8} style={outer}>
               {/* Header */}
               <Center axis="horizontal">
-                <Section variant="transparent" maxWidth={680} padding={0}>
+                <Section variant="transparent" maxWidth={1000} padding={0}>
                   <VStack gap={4} hAlign="center" style={textCenter}>
                     <VStack gap={2} hAlign="center">
                       <Heading level={1} style={introHeading}>
@@ -149,14 +170,24 @@ export default function ClassicGalleryTemplate() {
                       </Text>
                     </VStack>
 
-                    <TabList
-                      value={filter}
-                      onChange={v => setFilter(v as Category)}>
-                      <Tab value="all" label="All" />
-                      <Tab value="lifestyle" label="Lifestyle" />
-                      <Tab value="scene" label="Scenery" />
-                      <Tab value="home" label="Home" />
-                    </TabList>
+                    <div role="tablist" aria-label="Gallery categories" style={filterRow}>
+                      {([
+                        ['all', 'All'],
+                        ['lifestyle', 'Lifestyle'],
+                        ['scene', 'Scenery'],
+                        ['home', 'Home'],
+                      ] as const).map(([value, label]) => (
+                        <button
+                          key={value}
+                          type="button"
+                          role="tab"
+                          aria-selected={filter === value}
+                          onClick={() => setFilter(value)}
+                          style={filter === value ? activeFilterButton : filterButton}>
+                          {label}
+                        </button>
+                      ))}
+                    </div>
                   </VStack>
                 </Section>
               </Center>
