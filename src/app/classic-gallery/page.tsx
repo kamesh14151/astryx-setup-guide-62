@@ -6,17 +6,34 @@ import {useState, type CSSProperties} from 'react';
 import {VStack, Layout, LayoutContent} from '@astryxdesign/core/Layout';
 import {Center} from '@astryxdesign/core/Center';
 import {Text, Heading} from '@astryxdesign/core/Text';
-import {Grid} from '@astryxdesign/core/Grid';
 import {Section} from '@astryxdesign/core/Section';
 import {TabList, Tab} from '@astryxdesign/core/TabList';
 
 // ─── Styles ─────────────────────────────────────────────────────────────────
 
 const outer: CSSProperties = {
-  maxWidth: 1200,
+  maxWidth: 1400,
   width: '100%',
   paddingInline: 'var(--spacing-6)',
   paddingBlock: 'var(--spacing-8)',
+};
+const introHeading: CSSProperties = {
+  fontSize: 'clamp(2rem, 3vw, 3rem)',
+  lineHeight: 1.12,
+  letterSpacing: '-0.04em',
+  fontWeight: 700,
+  color: '#0b0b0c',
+};
+const introCopy: CSSProperties = {
+  maxWidth: 760,
+  fontSize: 'clamp(1rem, 1.35vw, 1.25rem)',
+  lineHeight: 1.5,
+  color: '#5f636b',
+};
+const galleryGrid: CSSProperties = {
+  display: 'grid',
+  gridTemplateColumns: 'repeat(4, minmax(0, 1fr))',
+  gap: 'var(--spacing-4)',
 };
 const imageWrapper: CSSProperties = {
   position: 'relative',
@@ -120,11 +137,11 @@ export default function ClassicGalleryTemplate() {
                 <Section variant="transparent" maxWidth={680} padding={0}>
                   <VStack gap={4} hAlign="center" style={textCenter}>
                     <VStack gap={2} hAlign="center">
-                      <Heading level={1}>
+                      <Heading level={1} style={introHeading}>
                         Make every day a little more delightful, one detail at a
                         time.
                       </Heading>
-                      <Text type="body" color="secondary">
+                      <Text type="body" color="secondary" style={introCopy}>
                         We believe the smallest details are the ones that matter
                         most. A little color, a thoughtful touch, a moment that
                         catches your eye and makes you pause; that&apos;s what
@@ -145,13 +162,13 @@ export default function ClassicGalleryTemplate() {
               </Center>
 
               {/* Gallery Grid */}
-              <Grid columns={{minWidth: 260, repeat: 'fit'}} gap={4}>
+              <div style={galleryGrid}>
                 {filteredImages.map((image, i) => (
                   <div key={i} style={imageWrapper}>
                     <img src={image.src} alt={image.alt} style={imgFill} />
                   </div>
                 ))}
-              </Grid>
+              </div>
             </VStack>
           </Center>
         </LayoutContent>
