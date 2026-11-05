@@ -25,6 +25,7 @@ export default function UploadPage() {
   const [status, setStatus] = useState<string>('');
   const [busy, setBusy] = useState(false);
   const [images, setImages] = useState<RemoteImage[]>([]);
+  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
 
   const refresh = useCallback(async () => {
     try {
@@ -171,7 +172,12 @@ export default function UploadPage() {
             {images.map(img => (
               <div key={img.url} className="group relative aspect-[3/2] overflow-hidden rounded-2xl bg-muted">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src={img.url} alt={img.pathname} className="h-full w-full object-cover" />
+                <img
+                  src={img.url}
+                  alt={img.pathname}
+                  className="h-full w-full cursor-zoom-in object-cover object-top"
+                  onClick={() => setPreviewUrl(img.url)}
+                />
                 <span className="absolute left-2 top-2 rounded-full bg-black/60 px-2 py-0.5 text-xs text-white">
                   {img.category}
                 </span>
@@ -186,6 +192,49 @@ export default function UploadPage() {
           </div>
         </section>
       </div>
+
+      {/* Image preview modal */}
+      {previewUrl && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 p-6"
+          onClick={() => setPreviewUrl(null)}>
+          <div
+            className="relative flex max-h-[90vh] max-w-[90vw] flex-col gap-3"
+            onClick={e => e.stopPropagation()}>
+            <div className="absolute -top-10 right-0 flex gap-2">
+              <button
+                type="button"
+                title="Download"
+                onClick={async () => {
+                  const res = await fetch(previewUrl);
+                  const blob = await res.blob();
+                  const url = URL.createObjectURL(blob);
+                  const a = document.createElement('a');
+                  a.href = url;
+                  a.download = previewUrl.split('/').pop() ?? 'image';
+                  a.click();
+                  URL.revokeObjectURL(url);
+                }}
+                className="flex h-9 w-9 items-center justify-center rounded-full bg-white/20 text-white backdrop-blur-md hover:bg-white/30">
+                ↓
+              </button>
+              <button
+                type="button"
+                title="Close"
+                onClick={() => setPreviewUrl(null)}
+                className="flex h-9 w-9 items-center justify-center rounded-full bg-white/20 text-white backdrop-blur-md hover:bg-white/30">
+                ✕
+              </button>
+            </div>
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src={previewUrl}
+              alt="Preview"
+              className="max-h-[80vh] max-w-full rounded-[20px] object-contain object-top"
+            />
+          </div>
+        </div>
+      )}
     </main>
   );
 }
