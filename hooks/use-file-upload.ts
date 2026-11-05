@@ -22,10 +22,18 @@ export type FileMetadata = {
   id: string
 }
 
+export type FileOrientation = 'portrait' | 'landscape' | 'square'
+
 export type FileWithPreview = {
   file: File | FileMetadata
   id: string
   preview?: string
+  // Shortcuts so UI code does not have to reach into `file`.
+  name: string
+  size: number
+  type: string
+  /** Filled in shortly after an image is added (needs the picture decoded). */
+  orientation?: FileOrientation
 }
 
 export type FileUploadOptions = {
@@ -88,6 +96,9 @@ export const useFileUpload = (
       file,
       id: file.id,
       preview: file.url,
+      name: file.name,
+      size: file.size,
+      type: file.type,
     })),
     isDragging: false,
     errors: [],
@@ -155,6 +166,9 @@ export const useFileUpload = (
         }
         valid.push({
           file,
+          name: file.name,
+          size: file.size,
+          type: file.type,
           id: `${file.name}-${Date.now()}-${Math.random().toString(36).slice(2, 9)}`,
           preview: file.type.startsWith('image/')
             ? URL.createObjectURL(file)
@@ -175,6 +189,23 @@ export const useFileUpload = (
           onFilesChange?.(files)
           return {...prev, files, errors}
         })
+        // Work out portrait / landscape once each picture has decoded.
+        for (const entry of valid) {
+          if (!entry.preview) continue
+          const img = new Image()
+          img.onload = () => {
+            const ratio = img.naturalWidth / img.naturalHeight
+            const orientation: FileOrientation =
+              ratio < 0.9 ? 'portrait' : ratio > 1.15 ? 'landscape' : 'square'
+            setState(prev => ({
+              ...prev,
+              files: prev.files.map(f =>
+                f.id === entry.id ? {...f, orientation} : f,
+              ),
+            }))
+          }
+          img.src = entry.preview
+        }
       } else if (errors.length > 0) {
         setState(prev => ({...prev, errors}))
       }

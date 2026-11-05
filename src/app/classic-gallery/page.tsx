@@ -1,5 +1,6 @@
 'use client';
 
+import Link from 'next/link';
 import {useEffect, useState} from 'react';
 import {SmartImage} from '../../components/smart-image';
 import {
