@@ -2,6 +2,7 @@
 
 import {useState, useMemo} from 'react';
 import Link from 'next/link';
+import {Table} from '@astryxdesign/core/Table';
 
 // ─── Data Definitions ────────────────────────────────────────────────────────
 
@@ -1072,67 +1073,78 @@ export default function GpaPage() {
                   </button>
                 </div>
               ) : (
-                /* Course Cards List */
-                <div className="flex flex-col gap-3">
-                  {allCurrentSubjects.map((subject, idx) => {
-                    const activeGrade = grades[subject.code] ?? '';
-                    return (
-                      <div
-                        key={`${subject.code}-${idx}`}
-                        className={`rounded-[20px] border p-4 sm:p-5 flex flex-col md:flex-row md:items-center justify-between gap-4 transition-colors ${
-                          activeGrade
-                            ? 'border-border bg-card shadow-sm'
-                            : 'border-border/60 bg-card/60 hover:bg-card'
-                        }`}>
-                        <div className="flex items-start gap-3 sm:gap-4">
-                          <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-muted text-xs font-semibold text-muted-foreground">
-                            {idx + 1}
-                          </span>
-                          <div>
-                            <div className="flex items-center gap-2 flex-wrap">
-                              <span className="font-mono text-xs font-medium text-muted-foreground bg-muted px-2 py-0.5 rounded-md">
+                /* Course Table using @astryxdesign/core/Table */
+                <div className="overflow-x-auto rounded-[20px] border border-border bg-card shadow-sm">
+                  <Table className="w-full text-left text-sm">
+                    <thead className="border-b border-border bg-muted/40 text-xs uppercase tracking-wider text-muted-foreground font-semibold">
+                      <tr>
+                        <th className="px-4 py-3.5 text-center w-12">#</th>
+                        <th className="px-4 py-3.5 w-32">Code</th>
+                        <th className="px-4 py-3.5">Course Title</th>
+                        <th className="px-4 py-3.5 text-center w-24">Credits</th>
+                        <th className="px-4 py-3.5 text-center min-w-[340px]">Assign Grade</th>
+                        <th className="px-4 py-3.5 text-right w-24">Points</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-border">
+                      {allCurrentSubjects.map((subject, idx) => {
+                        const activeGrade = grades[subject.code] ?? '';
+                        const points = activeGrade ? GRADE_POINTS[activeGrade] * subject.credits : null;
+                        return (
+                          <tr
+                            key={`${subject.code}-${idx}`}
+                            className={`transition-colors hover:bg-muted/30 ${
+                              activeGrade ? 'bg-card' : 'bg-card/60'
+                            }`}>
+                            <td className="px-4 py-4 text-center font-mono text-xs text-muted-foreground">
+                              {idx + 1}
+                            </td>
+                            <td className="px-4 py-4 font-mono text-xs font-semibold text-foreground">
+                              <span className="rounded-md bg-muted px-2 py-1 border border-border">
                                 {subject.code}
                               </span>
-                              <span className="text-xs font-medium text-muted-foreground">
-                                {subject.credits} {subject.credits === 1 ? 'Credit' : 'Credits'}
-                              </span>
-                              {activeGrade && (
-                                <span className="text-xs font-semibold text-foreground">
-                                  Points: {GRADE_POINTS[activeGrade] * subject.credits}
-                                </span>
-                              )}
-                            </div>
-                            <h4 className="mt-1 font-medium text-base text-foreground">
+                            </td>
+                            <td className="px-4 py-4 font-medium text-foreground">
                               {subject.name}
-                            </h4>
-                          </div>
-                        </div>
-
-                        {/* Grade Pills */}
-                        <div className="flex items-center gap-1.5 flex-wrap sm:flex-nowrap">
-                          {Object.entries(GRADE_POINTS).map(([gradeLetter, gradeVal]) => {
-                            const isChosen = activeGrade === gradeLetter;
-                            return (
-                              <button
-                                key={gradeLetter}
-                                type="button"
-                                onClick={() => handleSetGrade(subject.code, gradeLetter)}
-                                className={`rounded-xl border px-3 py-2 text-xs transition-all min-w-[42px] flex flex-col items-center ${
-                                  isChosen
-                                    ? 'bg-foreground text-background border-foreground font-bold shadow-sm'
-                                    : 'border-border bg-muted/50 text-foreground hover:bg-muted'
-                                }`}>
-                                <span className="font-semibold">{gradeLetter}</span>
-                                <span className={`text-[10px] ${isChosen ? 'text-background/80' : 'text-muted-foreground'}`}>
-                                  {gradeVal}
-                                </span>
-                              </button>
-                            );
-                          })}
-                        </div>
-                      </div>
-                    );
-                  })}
+                            </td>
+                            <td className="px-4 py-4 text-center text-sm font-semibold text-foreground">
+                              {subject.credits}
+                            </td>
+                            <td className="px-4 py-3 text-center">
+                              <div className="inline-flex items-center gap-1.5 flex-wrap justify-center">
+                                {Object.entries(GRADE_POINTS).map(([gradeLetter, gradeVal]) => {
+                                  const isChosen = activeGrade === gradeLetter;
+                                  return (
+                                    <button
+                                      key={gradeLetter}
+                                      type="button"
+                                      onClick={() => handleSetGrade(subject.code, gradeLetter)}
+                                      className={`rounded-xl border px-3 py-1.5 text-xs transition-all min-w-[40px] flex flex-col items-center ${
+                                        isChosen
+                                          ? 'bg-foreground text-background border-foreground font-bold shadow-sm'
+                                          : 'border-border bg-muted/50 text-foreground hover:bg-muted'
+                                      }`}>
+                                      <span className="font-semibold leading-none">{gradeLetter}</span>
+                                      <span className={`text-[10px] mt-0.5 ${isChosen ? 'text-background/80' : 'text-muted-foreground'}`}>
+                                        {gradeVal}
+                                      </span>
+                                    </button>
+                                  );
+                                })}
+                              </div>
+                            </td>
+                            <td className="px-4 py-4 text-right font-mono text-sm font-bold text-foreground">
+                              {points !== null ? (
+                                <span>{points}</span>
+                              ) : (
+                                <span className="text-muted-foreground font-normal font-sans text-xs">—</span>
+                              )}
+                            </td>
+                          </tr>
+                        );
+                      })}
+                    </tbody>
+                  </Table>
                 </div>
               )}
             </section>
