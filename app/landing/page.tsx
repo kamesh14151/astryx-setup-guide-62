@@ -14,15 +14,15 @@ import {ArrowRightIcon} from '@heroicons/react/20/solid';
 
 const TOOLS = [
   {
-    src: '/template-assets/colorful-home-horizontal-1.png',
-    alt: 'Colorful home interior with vibrant decor',
+    src: '/https-astryx-setup-guide.vercel.app-kanban.png',
+    alt: 'Kanban board tool screenshot',
     href: '/kanban',
     label: 'Kanban Board',
     tooltip: 'Go to Kanban Board — manage your tasks visually',
   },
   {
-    src: '/template-assets/colorful-lifestyle-horizontal-1.png',
-    alt: 'Colorful lifestyle portrait with natural lighting',
+    src: '/https-astryx-setup-guide.vercel.app-upload.png',
+    alt: 'File upload and media management tool screenshot',
     href: '/upload',
     label: 'Upload',
     tooltip: 'Go to Upload — manage and upload your files',
