@@ -981,37 +981,40 @@ export default function GpaPage() {
             </section>
 
             {/* STEP 3: Subjects & Grade Assignment */}
-            <section className="flex flex-col gap-4">
-              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-                <h2 className="text-lg font-semibold tracking-tight">
-                  3. Assign Grades ({allCurrentSubjects.length} Courses)
-                </h2>
+            <section className="flex flex-col gap-3">
+              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2.5">
+                <div className="flex items-center gap-2">
+                  <h2 className="text-base font-semibold tracking-tight">3. Assign Grades</h2>
+                  <span className="rounded-full bg-muted px-2.5 py-0.5 text-xs font-medium text-muted-foreground">
+                    {allCurrentSubjects.length} Courses • {calculation.totalCredits} Credits
+                  </span>
+                </div>
 
-                <div className="flex flex-wrap items-center gap-2">
-                  <span className="text-xs text-muted-foreground">Quick Fill:</span>
+                <div className="flex flex-wrap items-center gap-1.5 text-xs">
+                  <span className="text-muted-foreground text-[11px] mr-1">Quick:</span>
                   <button
                     type="button"
                     onClick={() => handleSetAllGrades('O')}
-                    className="rounded-lg bg-muted px-2.5 py-1 text-xs font-medium text-foreground hover:bg-muted/70 transition-colors">
-                    All O (10)
+                    className="rounded-md bg-muted px-2 py-1 font-medium text-foreground hover:bg-muted/70 transition-colors">
+                    All O
                   </button>
                   <button
                     type="button"
                     onClick={() => handleSetAllGrades('A+')}
-                    className="rounded-lg bg-muted px-2.5 py-1 text-xs font-medium text-foreground hover:bg-muted/70 transition-colors">
-                    All A+ (9)
+                    className="rounded-md bg-muted px-2 py-1 font-medium text-foreground hover:bg-muted/70 transition-colors">
+                    All A+
                   </button>
                   <button
                     type="button"
                     onClick={() => setGrades({})}
-                    className="rounded-lg bg-muted px-2.5 py-1 text-xs font-medium text-muted-foreground hover:text-foreground transition-colors">
-                    Clear
+                    className="rounded-md bg-muted px-2 py-1 font-medium text-muted-foreground hover:text-foreground transition-colors">
+                    Reset
                   </button>
                   <button
                     type="button"
                     onClick={() => setShowAddCustom(!showAddCustom)}
-                    className="rounded-lg border border-border bg-card px-2.5 py-1 text-xs font-medium text-foreground hover:bg-muted/70 transition-colors">
-                    + Add Custom Subject
+                    className="rounded-md border border-border bg-card px-2 py-1 font-medium text-foreground hover:bg-muted/70 transition-colors">
+                    + Custom
                   </button>
                 </div>
               </div>
@@ -1020,36 +1023,36 @@ export default function GpaPage() {
               {showAddCustom && (
                 <form
                   onSubmit={handleAddSubject}
-                  className="rounded-[20px] border border-border bg-card p-5 flex flex-col gap-4 shadow-sm">
-                  <h3 className="text-sm font-semibold text-foreground">Add Custom / Elective Course</h3>
-                  <div className="grid grid-cols-1 sm:grid-cols-4 gap-3">
+                  className="rounded-xl border border-border bg-card p-4 flex flex-col gap-3 shadow-xs">
+                  <h3 className="text-xs font-semibold text-foreground">Add Custom / Elective Course</h3>
+                  <div className="grid grid-cols-1 sm:grid-cols-4 gap-2.5">
                     <div>
-                      <label className="text-xs font-medium text-muted-foreground block mb-1">Subject Code</label>
+                      <label className="text-[11px] font-medium text-muted-foreground block mb-1">Code</label>
                       <input
                         type="text"
                         placeholder="e.g. U23CS901"
                         value={customCode}
                         onChange={e => setCustomCode(e.target.value)}
-                        className="w-full rounded-xl border border-input bg-background px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-1 focus:ring-ring"
+                        className="w-full rounded-lg border border-input bg-background px-2.5 py-1.5 text-xs text-foreground focus:outline-none focus:ring-1 focus:ring-ring"
                       />
                     </div>
                     <div className="sm:col-span-2">
-                      <label className="text-xs font-medium text-muted-foreground block mb-1">Course Title</label>
+                      <label className="text-[11px] font-medium text-muted-foreground block mb-1">Course Title</label>
                       <input
                         type="text"
                         placeholder="e.g. Mobile Application Development"
                         value={customName}
                         onChange={e => setCustomName(e.target.value)}
                         required
-                        className="w-full rounded-xl border border-input bg-background px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-1 focus:ring-ring"
+                        className="w-full rounded-lg border border-input bg-background px-2.5 py-1.5 text-xs text-foreground focus:outline-none focus:ring-1 focus:ring-ring"
                       />
                     </div>
                     <div>
-                      <label className="text-xs font-medium text-muted-foreground block mb-1">Credits</label>
+                      <label className="text-[11px] font-medium text-muted-foreground block mb-1">Credits</label>
                       <select
                         value={customCredits}
                         onChange={e => setCustomCredits(e.target.value)}
-                        className="w-full rounded-xl border border-input bg-background px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-1 focus:ring-ring">
+                        className="w-full rounded-lg border border-input bg-background px-2.5 py-1.5 text-xs text-foreground focus:outline-none focus:ring-1 focus:ring-ring">
                         <option value="1">1 Credit</option>
                         <option value="2">2 Credits</option>
                         <option value="3">3 Credits</option>
@@ -1062,13 +1065,13 @@ export default function GpaPage() {
                     <button
                       type="button"
                       onClick={() => setShowAddCustom(false)}
-                      className="rounded-xl px-4 py-2 text-sm text-muted-foreground hover:text-foreground">
+                      className="rounded-lg px-3 py-1 text-xs text-muted-foreground hover:text-foreground">
                       Cancel
                     </button>
                     <button
                       type="submit"
-                      className="rounded-xl bg-foreground px-4 py-2 text-sm font-medium text-background hover:opacity-90">
-                      Add Course
+                      className="rounded-lg bg-foreground px-3 py-1 text-xs font-medium text-background hover:opacity-90">
+                      Add
                     </button>
                   </div>
                 </form>
@@ -1076,84 +1079,82 @@ export default function GpaPage() {
 
               {/* Empty state */}
               {allCurrentSubjects.length === 0 ? (
-                <div className="rounded-[20px] border border-dashed border-border p-12 text-center bg-card">
-                  <h3 className="text-base font-semibold text-foreground">No Predefined Syllabus for Sem {selectedSemester}</h3>
-                  <p className="text-sm text-muted-foreground mt-1 max-w-sm mx-auto">
+                <div className="rounded-xl border border-dashed border-border p-8 text-center bg-card">
+                  <h3 className="text-sm font-semibold text-foreground">No Predefined Syllabus for Sem {selectedSemester}</h3>
+                  <p className="text-xs text-muted-foreground mt-1 max-w-sm mx-auto">
                     Add your elective and core subjects manually to compute your GPA.
                   </p>
                   <button
                     type="button"
                     onClick={() => setShowAddCustom(true)}
-                    className="mt-4 rounded-xl bg-foreground px-4 py-2 text-sm font-medium text-background hover:opacity-90 transition-opacity">
+                    className="mt-3 rounded-lg bg-foreground px-3.5 py-1.5 text-xs font-medium text-background hover:opacity-90 transition-opacity">
                     + Add Subject
                   </button>
                 </div>
               ) : (
-                /* Course Table using @astryxdesign/core/Table */
-                <div className="overflow-x-auto rounded-[20px] border border-border bg-card shadow-sm">
-                  <Table className="w-full text-left text-sm">
-                    <thead className="border-b border-border bg-muted/40 text-xs uppercase tracking-wider text-muted-foreground font-semibold">
+                /* Compact Aesthetic Table using @astryxdesign/core/Table */
+                <div className="overflow-x-auto rounded-xl border border-border bg-card shadow-xs">
+                  <Table className="w-full text-left text-xs sm:text-sm">
+                    <thead className="border-b border-border bg-muted/30 text-[11px] uppercase tracking-wider text-muted-foreground font-semibold">
                       <tr>
-                        <th className="px-4 py-3.5 text-center w-12">#</th>
-                        <th className="px-4 py-3.5 w-32">Code</th>
-                        <th className="px-4 py-3.5">Course Title</th>
-                        <th className="px-4 py-3.5 text-center w-24">Credits</th>
-                        <th className="px-4 py-3.5 text-center min-w-[340px]">Assign Grade</th>
-                        <th className="px-4 py-3.5 text-right w-24">Points</th>
+                        <th className="px-3 py-2.5 text-center w-10">#</th>
+                        <th className="px-3 py-2.5">Course</th>
+                        <th className="px-3 py-2.5 text-center w-20">Credits</th>
+                        <th className="px-3 py-2.5 text-center min-w-[260px]">Grade</th>
+                        <th className="px-3 py-2.5 text-right w-16">Points</th>
                       </tr>
                     </thead>
-                    <tbody className="divide-y divide-border">
+                    <tbody className="divide-y divide-border/60">
                       {allCurrentSubjects.map((subject, idx) => {
                         const activeGrade = grades[subject.code] ?? '';
                         const points = activeGrade ? GRADE_POINTS[activeGrade] * subject.credits : null;
                         return (
                           <tr
                             key={`${subject.code}-${idx}`}
-                            className={`transition-colors hover:bg-muted/30 ${
-                              activeGrade ? 'bg-card' : 'bg-card/60'
+                            className={`transition-colors hover:bg-muted/20 ${
+                              activeGrade ? 'bg-card' : 'bg-card/40'
                             }`}>
-                            <td className="px-4 py-4 text-center font-mono text-xs text-muted-foreground">
+                            <td className="px-3 py-2.5 text-center font-mono text-[11px] text-muted-foreground">
                               {idx + 1}
                             </td>
-                            <td className="px-4 py-4 font-mono text-xs font-semibold text-foreground">
-                              <span className="rounded-md bg-muted px-2 py-1 border border-border">
-                                {subject.code}
-                              </span>
+                            <td className="px-3 py-2.5">
+                              <div className="flex items-center gap-2 flex-wrap">
+                                <span className="font-mono text-[10px] font-semibold text-muted-foreground bg-muted px-1.5 py-0.5 rounded border border-border">
+                                  {subject.code}
+                                </span>
+                                <span className="font-medium text-foreground text-xs sm:text-sm">
+                                  {subject.name}
+                                </span>
+                              </div>
                             </td>
-                            <td className="px-4 py-4 font-medium text-foreground">
-                              {subject.name}
-                            </td>
-                            <td className="px-4 py-4 text-center text-sm font-semibold text-foreground">
+                            <td className="px-3 py-2.5 text-center font-medium text-xs text-muted-foreground">
                               {subject.credits}
                             </td>
-                            <td className="px-4 py-3 text-center">
-                              <div className="inline-flex items-center gap-1.5 flex-wrap justify-center">
-                                {Object.entries(GRADE_POINTS).map(([gradeLetter, gradeVal]) => {
+                            <td className="px-3 py-2 text-center">
+                              <div className="inline-flex items-center rounded-lg border border-border bg-muted/40 p-0.5 gap-0.5">
+                                {Object.keys(GRADE_POINTS).map(gradeLetter => {
                                   const isChosen = activeGrade === gradeLetter;
                                   return (
                                     <button
                                       key={gradeLetter}
                                       type="button"
                                       onClick={() => handleSetGrade(subject.code, gradeLetter)}
-                                      className={`rounded-xl border px-3 py-1.5 text-xs transition-all min-w-[40px] flex flex-col items-center ${
+                                      className={`h-6 w-7 sm:h-6 sm:w-8 rounded-md text-[11px] font-semibold transition-all ${
                                         isChosen
-                                          ? 'bg-foreground text-background border-foreground font-bold shadow-sm'
-                                          : 'border-border bg-muted/50 text-foreground hover:bg-muted'
+                                          ? 'bg-foreground text-background shadow-xs font-bold'
+                                          : 'text-muted-foreground hover:text-foreground hover:bg-background/60'
                                       }`}>
-                                      <span className="font-semibold leading-none">{gradeLetter}</span>
-                                      <span className={`text-[10px] mt-0.5 ${isChosen ? 'text-background/80' : 'text-muted-foreground'}`}>
-                                        {gradeVal}
-                                      </span>
+                                      {gradeLetter}
                                     </button>
                                   );
                                 })}
                               </div>
                             </td>
-                            <td className="px-4 py-4 text-right font-mono text-sm font-bold text-foreground">
+                            <td className="px-3 py-2.5 text-right font-mono text-xs font-bold text-foreground">
                               {points !== null ? (
                                 <span>{points}</span>
                               ) : (
-                                <span className="text-muted-foreground font-normal font-sans text-xs">—</span>
+                                <span className="text-muted-foreground font-normal text-[11px]">—</span>
                               )}
                             </td>
                           </tr>
