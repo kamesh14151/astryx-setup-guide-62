@@ -1,7 +1,6 @@
 'use client';
 
 import type {CSSProperties} from 'react';
-import NextLink from 'next/link';
 import {VStack, HStack, Layout, LayoutContent} from '@astryxdesign/core/Layout';
 import {Text, Heading} from '@astryxdesign/core/Text';
 import {Button} from '@astryxdesign/core/Button';
@@ -47,11 +46,6 @@ const galleryImageClip: CSSProperties = {
   borderRadius: 'var(--radius-container)',
 };
 
-const toolCard: CSSProperties = {
-  position: 'relative',
-  display: 'block',
-  textDecoration: 'none',
-};
 
 export default function LandingPage() {
   return (
@@ -99,12 +93,10 @@ export default function LandingPage() {
                     {tool.label}
                   </Text>
 
-                  {/* Clickable image */}
-                  <NextLink href={tool.href} style={toolCard}>
-                    <AspectRatio ratio={4 / 5} style={galleryImageClip}>
-                      <img style={galleryImage} src={tool.src} alt={tool.alt} />
-                    </AspectRatio>
-                  </NextLink>
+                  {/* Plain image — not clickable */}
+                  <AspectRatio ratio={4 / 5} style={galleryImageClip}>
+                    <img style={galleryImage} src={tool.src} alt={tool.alt} />
+                  </AspectRatio>
 
                   {/* Standalone text link below the image */}
                   <Link href={tool.href} isStandalone>
