@@ -1,6 +1,6 @@
 'use client';
 
-import {useState, useMemo, type CSSProperties} from 'react';
+import {useState, useMemo} from 'react';
 import Link from 'next/link';
 
 // ─── Data Definitions ────────────────────────────────────────────────────────
@@ -31,7 +31,7 @@ export const GRADE_POINTS: Record<string, number> = {
 export const BRANCHES_DATA: Record<string, Department> = {
   CSE: {
     name: 'Computer Science',
-    color: '#3B82F6',
+    color: 'var(--cse-color, #2563eb)',
     icon: 'code',
     semesters: {
       '1': [
@@ -95,7 +95,7 @@ export const BRANCHES_DATA: Record<string, Department> = {
   },
   IT: {
     name: 'Info. Technology',
-    color: '#06B6D4',
+    color: 'var(--it-color, #0891b2)',
     icon: 'network',
     semesters: {
       '1': [
@@ -126,7 +126,7 @@ export const BRANCHES_DATA: Record<string, Department> = {
   },
   ECE: {
     name: 'Electronics & Comm',
-    color: '#F59E0B',
+    color: 'var(--ece-color, #d97706)',
     icon: 'satellite',
     semesters: {
       '1': [
@@ -157,7 +157,7 @@ export const BRANCHES_DATA: Record<string, Department> = {
   },
   EEE: {
     name: 'Electrical & Electronics',
-    color: '#EAB308',
+    color: 'var(--eee-color, #ca8a04)',
     icon: 'bolt',
     semesters: {
       '1': [
@@ -188,7 +188,7 @@ export const BRANCHES_DATA: Record<string, Department> = {
   },
   MECH: {
     name: 'Mechanical',
-    color: '#EF4444',
+    color: 'var(--mech-color, #dc2626)',
     icon: 'cog',
     semesters: {
       '1': [
@@ -219,7 +219,7 @@ export const BRANCHES_DATA: Record<string, Department> = {
   },
   AIML: {
     name: 'AI & Machine Learning',
-    color: '#8B5CF6',
+    color: 'var(--aiml-color, #7c3aed)',
     icon: 'brain',
     semesters: {
       '1': [
@@ -300,7 +300,7 @@ export const BRANCHES_DATA: Record<string, Department> = {
   },
   CIVIL: {
     name: 'Civil Engineering',
-    color: '#10B981',
+    color: 'var(--civil-color, #059669)',
     icon: 'building',
     semesters: {
       '1': [
@@ -331,7 +331,7 @@ export const BRANCHES_DATA: Record<string, Department> = {
   },
   BME: {
     name: 'Bio Medical',
-    color: '#EC4899',
+    color: 'var(--bme-color, #db2777)',
     icon: 'heartbeat',
     semesters: {
       '1': [
@@ -362,7 +362,7 @@ export const BRANCHES_DATA: Record<string, Department> = {
   },
   FT: {
     name: 'Fashion Technology',
-    color: '#F43F5E',
+    color: 'var(--ft-color, #e11d48)',
     icon: 'tshirt',
     semesters: {
       '1': [
@@ -393,7 +393,7 @@ export const BRANCHES_DATA: Record<string, Department> = {
   },
   MCT: {
     name: 'Mechatronics',
-    color: '#14B8A6',
+    color: 'var(--mct-color, #0d9488)',
     icon: 'robot',
     semesters: {
       '1': [
@@ -424,7 +424,7 @@ export const BRANCHES_DATA: Record<string, Department> = {
   },
   CSD: {
     name: 'CS & Design',
-    color: '#6366F1',
+    color: 'var(--csd-color, #4f46e5)',
     icon: 'paintbrush',
     semesters: {
       '1': [
@@ -455,7 +455,7 @@ export const BRANCHES_DATA: Record<string, Department> = {
   },
   ADS: {
     name: 'AI & Data Science',
-    color: '#A855F7',
+    color: 'var(--ads-color, #9333ea)',
     icon: 'database',
     semesters: {
       '1': [
@@ -486,7 +486,7 @@ export const BRANCHES_DATA: Record<string, Department> = {
   },
   EFE: {
     name: 'Electrical & Computer',
-    color: '#0284C7',
+    color: 'var(--efe-color, #0284c7)',
     icon: 'microchip',
     semesters: {
       '1': [
@@ -517,7 +517,7 @@ export const BRANCHES_DATA: Record<string, Department> = {
   },
   EXE: {
     name: 'Electronics & Computer',
-    color: '#4F46E5',
+    color: 'var(--exe-color, #4338ca)',
     icon: 'desktop',
     semesters: {
       '1': [
@@ -548,7 +548,6 @@ export const BRANCHES_DATA: Record<string, Department> = {
   },
 };
 
-// SVG Icon renderer matching each department
 function BranchIcon({type, size = 18, color = 'currentColor'}: {type: string; size?: number; color?: string}) {
   const props = {
     width: size,
@@ -694,7 +693,7 @@ export default function GpaPage() {
   // Mode: SGPA vs CGPA
   const [activeTab, setActiveTab] = useState<'sgpa' | 'cgpa'>('sgpa');
 
-  // CGPA entries: { sem: string, gpa: string, credits: string }[]
+  // CGPA entries
   const [cgpaEntries, setCgpaEntries] = useState([
     {sem: '1', gpa: '8.5', credits: '20'},
     {sem: '2', gpa: '8.8', credits: '21'},
@@ -708,26 +707,22 @@ export default function GpaPage() {
     return [...standardSubjects, ...customSubjects];
   }, [standardSubjects, customSubjects]);
 
-  // Handle branch switch
   const handleSelectBranch = (key: string) => {
     setSelectedBranch(key);
     setGrades({});
     setCustomSubjects([]);
   };
 
-  // Handle semester switch
   const handleSelectSemester = (sem: string) => {
     setSelectedSemester(sem);
     setGrades({});
     setCustomSubjects([]);
   };
 
-  // Assign grade to a subject
   const handleSetGrade = (code: string, grade: string) => {
     setGrades(prev => ({...prev, [code]: grade}));
   };
 
-  // Quick actions: set all subjects
   const handleSetAllGrades = (grade: string) => {
     const updated: Record<string, string> = {};
     allCurrentSubjects.forEach(s => {
@@ -736,7 +731,6 @@ export default function GpaPage() {
     setGrades(updated);
   };
 
-  // Add custom subject
   const handleAddSubject = (e: React.FormEvent) => {
     e.preventDefault();
     if (!customName.trim()) return;
@@ -793,13 +787,13 @@ export default function GpaPage() {
 
   // Performance tier based on SGPA
   const performance = useMemo(() => {
-    if (calculation.gradedCount === 0) return {text: 'Select your grades below', color: '#6B7280'};
-    if (calculation.arrearsCount > 0) return {text: `${calculation.arrearsCount} Arrear(s) Pending`, color: '#EF4444'};
-    if (calculation.sgpa >= 9.0) return {text: 'Outstanding • First Class with Distinction', color: '#10B981'};
-    if (calculation.sgpa >= 8.0) return {text: 'Excellent • First Class', color: '#3B82F6'};
-    if (calculation.sgpa >= 7.0) return {text: 'Very Good', color: '#8B5CF6'};
-    if (calculation.sgpa >= 6.0) return {text: 'Good', color: '#F59E0B'};
-    return {text: 'Passing Grade', color: '#6B7280'};
+    if (calculation.gradedCount === 0) return {text: 'Select grades below', color: 'text-muted-foreground'};
+    if (calculation.arrearsCount > 0) return {text: `${calculation.arrearsCount} Arrear(s)`, color: 'text-destructive'};
+    if (calculation.sgpa >= 9.0) return {text: 'Outstanding (First Class with Distinction)', color: 'text-foreground font-semibold'};
+    if (calculation.sgpa >= 8.0) return {text: 'Excellent (First Class)', color: 'text-foreground font-semibold'};
+    if (calculation.sgpa >= 7.0) return {text: 'Very Good', color: 'text-foreground'};
+    if (calculation.sgpa >= 6.0) return {text: 'Good', color: 'text-foreground'};
+    return {text: 'Passing Grade', color: 'text-muted-foreground'};
   }, [calculation]);
 
   // CGPA Calculation
@@ -827,108 +821,81 @@ export default function GpaPage() {
   }, [cgpaEntries]);
 
   return (
-    <div className="min-h-screen bg-[#0d0f14] text-neutral-100 antialiased pb-24 font-sans selection:bg-indigo-500/30 selection:text-indigo-200">
-      {/* Background ambient lighting */}
-      <div className="pointer-events-none fixed inset-0 overflow-hidden">
-        <div
-          className="absolute -top-40 left-1/2 -translate-x-1/2 w-[700px] h-[500px] rounded-full blur-[140px] opacity-20 transition-all duration-700"
-          style={{backgroundColor: activeDepartment.color}}
-        />
-        <div className="absolute top-[40%] -left-32 w-80 h-80 rounded-full blur-[120px] bg-indigo-500/10" />
-        <div className="absolute top-[60%] -right-32 w-80 h-80 rounded-full blur-[120px] bg-purple-500/10" />
-      </div>
-
-      <div className="relative mx-auto max-w-6xl px-4 sm:px-6 pt-8">
-        {/* Navigation Bar */}
-        <header className="flex items-center justify-between pb-8 border-b border-neutral-800/80">
+    <main className="min-h-screen w-full bg-background text-foreground antialiased pb-24 transition-colors">
+      <div className="mx-auto flex w-full max-w-[1100px] flex-col gap-10 px-6 py-12">
+        {/* Header Navigation */}
+        <header className="flex items-center justify-between border-b border-border pb-6">
           <Link
             href="/landing"
-            className="group inline-flex items-center gap-2 rounded-xl border border-neutral-800 bg-neutral-900/80 px-3.5 py-2 text-sm font-medium text-neutral-300 backdrop-blur-md transition-all hover:border-neutral-700 hover:bg-neutral-800 hover:text-white">
-            <span className="transition-transform group-hover:-translate-x-0.5">←</span>
+            className="inline-flex items-center gap-2 rounded-xl bg-muted px-4 py-2 text-sm font-medium text-foreground transition-colors hover:bg-muted/70">
+            <span>←</span>
             <span>Back to Hub</span>
           </Link>
 
-          <div className="flex items-center gap-3">
-            <div className="flex rounded-xl bg-neutral-900/90 p-1 border border-neutral-800">
-              <button
-                type="button"
-                onClick={() => setActiveTab('sgpa')}
-                className={`rounded-lg px-4 py-1.5 text-xs font-semibold transition-all ${
-                  activeTab === 'sgpa'
-                    ? 'bg-neutral-800 text-white shadow-sm'
-                    : 'text-neutral-400 hover:text-neutral-200'
-                }`}>
-                Semester SGPA
-              </button>
-              <button
-                type="button"
-                onClick={() => setActiveTab('cgpa')}
-                className={`rounded-lg px-4 py-1.5 text-xs font-semibold transition-all ${
-                  activeTab === 'cgpa'
-                    ? 'bg-neutral-800 text-white shadow-sm'
-                    : 'text-neutral-400 hover:text-neutral-200'
-                }`}>
-                Overall CGPA
-              </button>
-            </div>
+          <div className="flex rounded-xl bg-muted p-1">
+            <button
+              type="button"
+              onClick={() => setActiveTab('sgpa')}
+              className={`rounded-lg px-4 py-2 text-sm font-medium transition-colors ${
+                activeTab === 'sgpa'
+                  ? 'bg-foreground text-background shadow-sm'
+                  : 'text-muted-foreground hover:text-foreground'
+              }`}>
+              Semester SGPA
+            </button>
+            <button
+              type="button"
+              onClick={() => setActiveTab('cgpa')}
+              className={`rounded-lg px-4 py-2 text-sm font-medium transition-colors ${
+                activeTab === 'cgpa'
+                  ? 'bg-foreground text-background shadow-sm'
+                  : 'text-muted-foreground hover:text-foreground'
+              }`}>
+              Overall CGPA
+            </button>
           </div>
         </header>
 
-        {/* Hero Section */}
-        <div className="py-8 text-center sm:text-left sm:flex sm:items-end sm:justify-between gap-6 border-b border-neutral-800/80">
-          <div>
-            <div className="inline-flex items-center gap-2 rounded-full border border-indigo-500/30 bg-indigo-500/10 px-3 py-1 text-xs font-semibold text-indigo-400 mb-3">
-              <span className="h-1.5 w-1.5 rounded-full bg-indigo-400 animate-pulse" />
+        {/* Title & Live Score Hero Banner */}
+        <section className="flex flex-col gap-6 sm:flex-row sm:items-center sm:justify-between rounded-[20px] border border-border bg-card p-6 shadow-sm">
+          <div className="flex flex-col gap-2">
+            <span className="self-start rounded-full bg-muted px-3 py-1 text-xs font-medium text-muted-foreground">
               Regulation 2023 Autonomous Curriculum
-            </div>
-            <h1 className="text-3xl sm:text-4xl font-extrabold tracking-tight text-white">
+            </span>
+            <h1 className="text-[28px] font-semibold tracking-tight text-foreground md:text-[32px]">
               GPA & SGPA Calculator
             </h1>
-            <p className="mt-2 text-sm sm:text-base text-neutral-400 max-w-xl">
-              Choose your department and semester to compute your exact grade points with live academic honors analytics.
+            <p className="text-base text-muted-foreground max-w-lg">
+              Select your department and semester to compute your exact SGPA and cumulative credits in real time.
             </p>
           </div>
 
-          {/* Quick Score HUD badge in hero */}
-          <div className="mt-6 sm:mt-0 flex items-center justify-center sm:justify-end">
-            <div className="rounded-2xl border border-neutral-800/90 bg-neutral-900/70 p-4 backdrop-blur-xl shadow-xl flex items-center gap-4">
-              <div
-                className="flex h-14 w-14 shrink-0 items-center justify-center rounded-xl font-bold text-2xl transition-colors shadow-inner"
-                style={{
-                  backgroundColor: `${activeDepartment.color}15`,
-                  color: activeDepartment.color,
-                  border: `1px solid ${activeDepartment.color}35`,
-                }}>
-                {activeTab === 'sgpa' ? calculation.sgpa : cgpaResult.cgpa}
+          {/* Quick HUD Metric */}
+          <div className="flex items-center gap-4 rounded-xl border border-border bg-muted/40 p-4">
+            <div className="flex h-14 w-14 shrink-0 flex-col items-center justify-center rounded-xl bg-foreground text-background font-bold text-2xl shadow-sm">
+              {activeTab === 'sgpa' ? calculation.sgpa : cgpaResult.cgpa}
+            </div>
+            <div>
+              <div className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                {activeTab === 'sgpa' ? 'Current SGPA' : 'Overall CGPA'}
               </div>
-              <div className="text-left">
-                <div className="text-[11px] font-semibold uppercase tracking-wider text-neutral-400">
-                  {activeTab === 'sgpa' ? 'Computed SGPA' : 'Overall CGPA'}
-                </div>
-                <div className="text-xs font-medium" style={{color: performance.color}}>
-                  {activeTab === 'sgpa' ? performance.text : `${cgpaResult.filledCount} Semesters Calculated`}
-                </div>
+              <div className={`text-sm ${performance.color}`}>
+                {activeTab === 'sgpa' ? performance.text : `${cgpaResult.filledCount} Semesters entered`}
               </div>
             </div>
           </div>
-        </div>
+        </section>
 
         {activeTab === 'sgpa' ? (
           <>
             {/* STEP 1: Department Selection */}
-            <section className="mt-8">
-              <div className="flex items-center justify-between mb-4">
-                <div className="flex items-center gap-2">
-                  <span className="flex h-6 w-6 items-center justify-center rounded-full bg-neutral-800 text-xs font-bold text-neutral-300">
-                    1
-                  </span>
-                  <h2 className="text-base font-semibold text-white">Select Department</h2>
-                </div>
-                <span className="text-xs text-neutral-400">{branchKeys.length} Departments Available</span>
+            <section className="flex flex-col gap-4">
+              <div className="flex items-center justify-between">
+                <h2 className="text-lg font-semibold tracking-tight">1. Select Department</h2>
+                <span className="text-sm text-muted-foreground">{branchKeys.length} Departments</span>
               </div>
 
-              {/* Department Pills / Cards Grid */}
-              <div className="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-7 gap-2.5">
+              <div className="grid grid-cols-2 gap-2.5 sm:grid-cols-4 md:grid-cols-7">
                 {branchKeys.map(key => {
                   const dept = BRANCHES_DATA[key];
                   const isSelected = selectedBranch === key;
@@ -937,33 +904,19 @@ export default function GpaPage() {
                       key={key}
                       type="button"
                       onClick={() => handleSelectBranch(key)}
-                      className={`group relative flex flex-col items-start justify-between rounded-xl p-3 text-left transition-all duration-200 border ${
+                      className={`flex flex-col items-start justify-between rounded-xl p-3.5 text-left border transition-all ${
                         isSelected
-                          ? 'bg-neutral-800/90 shadow-lg scale-[1.02]'
-                          : 'bg-neutral-900/60 border-neutral-800/80 hover:bg-neutral-850 hover:border-neutral-700'
-                      }`}
-                      style={{
-                        borderColor: isSelected ? dept.color : undefined,
-                        boxShadow: isSelected ? `0 0 16px ${dept.color}20` : undefined,
-                      }}>
+                          ? 'border-foreground bg-foreground text-background shadow-sm'
+                          : 'border-border bg-card text-foreground hover:bg-muted/70'
+                      }`}>
                       <div className="flex items-center justify-between w-full mb-2">
-                        <span
-                          className="flex h-8 w-8 items-center justify-center rounded-lg transition-transform group-hover:scale-105"
-                          style={{
-                            backgroundColor: `${dept.color}18`,
-                            color: dept.color,
-                          }}>
-                          <BranchIcon type={dept.icon} size={16} color={dept.color} />
+                        <span className={`p-1.5 rounded-lg ${isSelected ? 'bg-background/20' : 'bg-muted'}`}>
+                          <BranchIcon type={dept.icon} size={15} color={isSelected ? 'currentColor' : undefined} />
                         </span>
-                        {isSelected && (
-                          <span
-                            className="h-2 w-2 rounded-full"
-                            style={{backgroundColor: dept.color}}
-                          />
-                        )}
+                        {isSelected && <span className="h-2 w-2 rounded-full bg-background" />}
                       </div>
-                      <div className="font-bold text-sm tracking-tight text-white">{key}</div>
-                      <div className="text-[11px] text-neutral-400 truncate w-full" title={dept.name}>
+                      <div className="font-semibold text-sm">{key}</div>
+                      <div className={`text-xs truncate w-full ${isSelected ? 'text-background/80' : 'text-muted-foreground'}`} title={dept.name}>
                         {dept.name}
                       </div>
                     </button>
@@ -973,21 +926,15 @@ export default function GpaPage() {
             </section>
 
             {/* STEP 2: Semester Selection */}
-            <section className="mt-8">
-              <div className="flex items-center justify-between mb-4">
-                <div className="flex items-center gap-2">
-                  <span className="flex h-6 w-6 items-center justify-center rounded-full bg-neutral-800 text-xs font-bold text-neutral-300">
-                    2
-                  </span>
-                  <h2 className="text-base font-semibold text-white">Select Semester</h2>
-                </div>
-                <span className="text-xs text-neutral-400">
+            <section className="flex flex-col gap-4">
+              <div className="flex items-center justify-between">
+                <h2 className="text-lg font-semibold tracking-tight">2. Select Semester</h2>
+                <span className="text-sm text-muted-foreground">
                   {activeDepartment.name} • Sem {selectedSemester}
                 </span>
               </div>
 
-              {/* Semester Tabs */}
-              <div className="grid grid-cols-4 sm:grid-cols-8 gap-2">
+              <div className="grid grid-cols-4 gap-2 sm:grid-cols-8">
                 {['1', '2', '3', '4', '5', '6', '7', '8'].map(sem => {
                   const isSelected = selectedSemester === sem;
                   const subjects = activeDepartment.semesters[sem] ?? [];
@@ -998,14 +945,16 @@ export default function GpaPage() {
                       key={sem}
                       type="button"
                       onClick={() => handleSelectSemester(sem)}
-                      className={`relative flex flex-col items-center justify-center rounded-xl py-3 px-2 border transition-all ${
+                      className={`flex flex-col items-center justify-center rounded-xl py-3 px-2 border transition-colors ${
                         isSelected
-                          ? 'bg-neutral-800 text-white font-semibold border-indigo-500 shadow-md scale-[1.02]'
-                          : 'bg-neutral-900/60 border-neutral-800/80 text-neutral-400 hover:text-neutral-200 hover:border-neutral-700'
+                          ? 'border-foreground bg-foreground text-background font-semibold shadow-sm'
+                          : 'border-border bg-card text-foreground hover:bg-muted/70'
                       }`}>
-                      <span className="text-xs uppercase tracking-wider text-neutral-400">Sem</span>
-                      <span className="text-xl font-bold text-white">{sem}</span>
-                      <span className="mt-1 text-[10px] text-neutral-400 font-mono">
+                      <span className={`text-[10px] uppercase tracking-wider ${isSelected ? 'text-background/80' : 'text-muted-foreground'}`}>
+                        Sem
+                      </span>
+                      <span className="text-xl font-bold">{sem}</span>
+                      <span className={`text-[11px] ${isSelected ? 'text-background/80' : 'text-muted-foreground'}`}>
                         {hasData ? `${subjects.length} sub` : 'Custom'}
                       </span>
                     </button>
@@ -1015,87 +964,75 @@ export default function GpaPage() {
             </section>
 
             {/* STEP 3: Subjects & Grade Assignment */}
-            <section className="mt-8">
-              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-4">
-                <div className="flex items-center gap-2">
-                  <span className="flex h-6 w-6 items-center justify-center rounded-full bg-neutral-800 text-xs font-bold text-neutral-300">
-                    3
-                  </span>
-                  <h2 className="text-base font-semibold text-white">
-                    Enter Subject Grades ({allCurrentSubjects.length} Courses)
-                  </h2>
-                </div>
+            <section className="flex flex-col gap-4">
+              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+                <h2 className="text-lg font-semibold tracking-tight">
+                  3. Assign Grades ({allCurrentSubjects.length} Courses)
+                </h2>
 
-                {/* Quick actions for setting all grades */}
                 <div className="flex flex-wrap items-center gap-2">
-                  <span className="text-xs text-neutral-400">Quick Fill:</span>
+                  <span className="text-xs text-muted-foreground">Quick Fill:</span>
                   <button
                     type="button"
                     onClick={() => handleSetAllGrades('O')}
-                    className="rounded-lg bg-emerald-500/10 border border-emerald-500/30 px-2.5 py-1 text-xs font-semibold text-emerald-400 hover:bg-emerald-500/20 transition-colors">
+                    className="rounded-lg bg-muted px-2.5 py-1 text-xs font-medium text-foreground hover:bg-muted/70 transition-colors">
                     All O (10)
                   </button>
                   <button
                     type="button"
                     onClick={() => handleSetAllGrades('A+')}
-                    className="rounded-lg bg-blue-500/10 border border-blue-500/30 px-2.5 py-1 text-xs font-semibold text-blue-400 hover:bg-blue-500/20 transition-colors">
+                    className="rounded-lg bg-muted px-2.5 py-1 text-xs font-medium text-foreground hover:bg-muted/70 transition-colors">
                     All A+ (9)
                   </button>
                   <button
                     type="button"
                     onClick={() => setGrades({})}
-                    className="rounded-lg bg-neutral-800 px-2.5 py-1 text-xs font-semibold text-neutral-400 hover:text-white transition-colors">
+                    className="rounded-lg bg-muted px-2.5 py-1 text-xs font-medium text-muted-foreground hover:text-foreground transition-colors">
                     Clear
                   </button>
                   <button
                     type="button"
                     onClick={() => setShowAddCustom(!showAddCustom)}
-                    className="rounded-lg border border-neutral-700 bg-neutral-800/80 px-2.5 py-1 text-xs font-semibold text-neutral-200 hover:border-neutral-500 transition-colors">
-                    + Add Subject
+                    className="rounded-lg border border-border bg-card px-2.5 py-1 text-xs font-medium text-foreground hover:bg-muted/70 transition-colors">
+                    + Add Custom Subject
                   </button>
                 </div>
               </div>
 
-              {/* Add Custom Subject Drawer */}
+              {/* Add Custom Subject Form */}
               {showAddCustom && (
                 <form
                   onSubmit={handleAddSubject}
-                  className="mb-6 rounded-2xl border border-indigo-500/30 bg-indigo-500/5 p-4 sm:p-5 backdrop-blur-md">
-                  <div className="text-sm font-bold text-white mb-3">Add Custom or Elective Course</div>
+                  className="rounded-[20px] border border-border bg-card p-5 flex flex-col gap-4 shadow-sm">
+                  <h3 className="text-sm font-semibold text-foreground">Add Custom / Elective Course</h3>
                   <div className="grid grid-cols-1 sm:grid-cols-4 gap-3">
                     <div>
-                      <label className="text-[11px] uppercase tracking-wider text-neutral-400 block mb-1">
-                        Code
-                      </label>
+                      <label className="text-xs font-medium text-muted-foreground block mb-1">Subject Code</label>
                       <input
                         type="text"
                         placeholder="e.g. U23CS901"
                         value={customCode}
                         onChange={e => setCustomCode(e.target.value)}
-                        className="w-full rounded-xl border border-neutral-700 bg-neutral-900 px-3 py-2 text-sm text-white focus:border-indigo-500 focus:outline-none"
+                        className="w-full rounded-xl border border-input bg-background px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-1 focus:ring-ring"
                       />
                     </div>
                     <div className="sm:col-span-2">
-                      <label className="text-[11px] uppercase tracking-wider text-neutral-400 block mb-1">
-                        Course Name
-                      </label>
+                      <label className="text-xs font-medium text-muted-foreground block mb-1">Course Title</label>
                       <input
                         type="text"
-                        placeholder="e.g. Cloud Computing & DevOps"
+                        placeholder="e.g. Mobile Application Development"
                         value={customName}
                         onChange={e => setCustomName(e.target.value)}
                         required
-                        className="w-full rounded-xl border border-neutral-700 bg-neutral-900 px-3 py-2 text-sm text-white focus:border-indigo-500 focus:outline-none"
+                        className="w-full rounded-xl border border-input bg-background px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-1 focus:ring-ring"
                       />
                     </div>
                     <div>
-                      <label className="text-[11px] uppercase tracking-wider text-neutral-400 block mb-1">
-                        Credits
-                      </label>
+                      <label className="text-xs font-medium text-muted-foreground block mb-1">Credits</label>
                       <select
                         value={customCredits}
                         onChange={e => setCustomCredits(e.target.value)}
-                        className="w-full rounded-xl border border-neutral-700 bg-neutral-900 px-3 py-2 text-sm text-white focus:border-indigo-500 focus:outline-none">
+                        className="w-full rounded-xl border border-input bg-background px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-1 focus:ring-ring">
                         <option value="1">1 Credit</option>
                         <option value="2">2 Credits</option>
                         <option value="3">3 Credits</option>
@@ -1104,101 +1041,91 @@ export default function GpaPage() {
                       </select>
                     </div>
                   </div>
-                  <div className="mt-3 flex justify-end gap-2">
+                  <div className="flex justify-end gap-2">
                     <button
                       type="button"
                       onClick={() => setShowAddCustom(false)}
-                      className="rounded-lg px-3 py-1.5 text-xs text-neutral-400 hover:text-white">
+                      className="rounded-xl px-4 py-2 text-sm text-muted-foreground hover:text-foreground">
                       Cancel
                     </button>
                     <button
                       type="submit"
-                      className="rounded-lg bg-indigo-600 px-4 py-1.5 text-xs font-semibold text-white hover:bg-indigo-500">
-                      Add to List
+                      className="rounded-xl bg-foreground px-4 py-2 text-sm font-medium text-background hover:opacity-90">
+                      Add Course
                     </button>
                   </div>
                 </form>
               )}
 
-              {/* No subjects in this semester state */}
+              {/* Empty state */}
               {allCurrentSubjects.length === 0 ? (
-                <div className="rounded-2xl border border-dashed border-neutral-800 bg-neutral-900/30 p-12 text-center">
-                  <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-xl bg-neutral-800/80 text-neutral-400 mb-3">
-                    <BranchIcon type="code" size={24} />
-                  </div>
-                  <h3 className="text-base font-semibold text-white">No Predefined Syllabus for Semester {selectedSemester}</h3>
-                  <p className="mt-1 text-sm text-neutral-400 max-w-md mx-auto">
-                    You can still calculate your GPA! Add your elective and core subjects using the button below.
+                <div className="rounded-[20px] border border-dashed border-border p-12 text-center bg-card">
+                  <h3 className="text-base font-semibold text-foreground">No Predefined Syllabus for Sem {selectedSemester}</h3>
+                  <p className="text-sm text-muted-foreground mt-1 max-w-sm mx-auto">
+                    Add your elective and core subjects manually to compute your GPA.
                   </p>
                   <button
                     type="button"
                     onClick={() => setShowAddCustom(true)}
-                    className="mt-4 inline-flex items-center gap-1.5 rounded-xl bg-indigo-600 px-4 py-2 text-xs font-semibold text-white hover:bg-indigo-500 transition-colors">
-                    + Add Subjects Manually
+                    className="mt-4 rounded-xl bg-foreground px-4 py-2 text-sm font-medium text-background hover:opacity-90 transition-opacity">
+                    + Add Subject
                   </button>
                 </div>
               ) : (
-                /* Subjects Cards List */
+                /* Course Cards List */
                 <div className="flex flex-col gap-3">
                   {allCurrentSubjects.map((subject, idx) => {
                     const activeGrade = grades[subject.code] ?? '';
                     return (
                       <div
                         key={`${subject.code}-${idx}`}
-                        className={`rounded-2xl border transition-all duration-150 p-4 sm:p-5 flex flex-col md:flex-row md:items-center justify-between gap-4 ${
+                        className={`rounded-[20px] border p-4 sm:p-5 flex flex-col md:flex-row md:items-center justify-between gap-4 transition-colors ${
                           activeGrade
-                            ? 'bg-neutral-900/90 border-neutral-800 shadow-md'
-                            : 'bg-neutral-900/50 border-neutral-850 hover:border-neutral-800'
+                            ? 'border-border bg-card shadow-sm'
+                            : 'border-border/60 bg-card/60 hover:bg-card'
                         }`}>
-                        {/* Course Info */}
                         <div className="flex items-start gap-3 sm:gap-4">
-                          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-neutral-800/90 border border-neutral-700/60 font-mono text-xs font-bold text-neutral-300">
+                          <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-muted text-xs font-semibold text-muted-foreground">
                             {idx + 1}
-                          </div>
+                          </span>
                           <div>
                             <div className="flex items-center gap-2 flex-wrap">
-                              <span className="font-mono text-xs font-semibold text-indigo-400 bg-indigo-500/10 px-2 py-0.5 rounded-md border border-indigo-500/20">
+                              <span className="font-mono text-xs font-medium text-muted-foreground bg-muted px-2 py-0.5 rounded-md">
                                 {subject.code}
                               </span>
-                              <span className="text-xs font-medium text-neutral-400 bg-neutral-800 px-2 py-0.5 rounded-md">
+                              <span className="text-xs font-medium text-muted-foreground">
                                 {subject.credits} {subject.credits === 1 ? 'Credit' : 'Credits'}
                               </span>
                               {activeGrade && (
-                                <span className="text-xs font-bold text-emerald-400">
+                                <span className="text-xs font-semibold text-foreground">
                                   Points: {GRADE_POINTS[activeGrade] * subject.credits}
                                 </span>
                               )}
                             </div>
-                            <h4 className="mt-1 font-semibold text-sm sm:text-base text-white">
+                            <h4 className="mt-1 font-medium text-base text-foreground">
                               {subject.name}
                             </h4>
                           </div>
                         </div>
 
-                        {/* Grade Selector Pills */}
-                        <div className="flex items-center gap-1.5 flex-wrap sm:flex-nowrap justify-start md:justify-end">
+                        {/* Grade Pills */}
+                        <div className="flex items-center gap-1.5 flex-wrap sm:flex-nowrap">
                           {Object.entries(GRADE_POINTS).map(([gradeLetter, gradeVal]) => {
                             const isChosen = activeGrade === gradeLetter;
-                            let activeStyle = 'bg-neutral-800 border-neutral-700 text-neutral-400 hover:text-white';
-
-                            if (isChosen) {
-                              if (gradeLetter === 'O') activeStyle = 'bg-emerald-500 text-white font-bold border-emerald-400 shadow-lg shadow-emerald-500/30';
-                              else if (gradeLetter === 'A+') activeStyle = 'bg-blue-500 text-white font-bold border-blue-400 shadow-lg shadow-blue-500/30';
-                              else if (gradeLetter === 'A') activeStyle = 'bg-cyan-500 text-white font-bold border-cyan-400 shadow-lg shadow-cyan-500/30';
-                              else if (gradeLetter === 'B+') activeStyle = 'bg-amber-500 text-black font-bold border-amber-400 shadow-lg shadow-amber-500/30';
-                              else if (gradeLetter === 'B') activeStyle = 'bg-yellow-500 text-black font-bold border-yellow-400 shadow-lg shadow-yellow-500/30';
-                              else if (gradeLetter === 'C') activeStyle = 'bg-orange-500 text-white font-bold border-orange-400 shadow-lg shadow-orange-500/30';
-                              else if (gradeLetter === 'U') activeStyle = 'bg-red-500 text-white font-bold border-red-400 shadow-lg shadow-red-500/30';
-                            }
-
                             return (
                               <button
                                 key={gradeLetter}
                                 type="button"
                                 onClick={() => handleSetGrade(subject.code, gradeLetter)}
-                                className={`rounded-xl border px-3 py-2 text-xs transition-all active:scale-95 min-w-[42px] flex flex-col items-center ${activeStyle}`}>
-                                <span className="font-bold">{gradeLetter}</span>
-                                <span className="text-[9px] opacity-80">{gradeVal}</span>
+                                className={`rounded-xl border px-3 py-2 text-xs transition-all min-w-[42px] flex flex-col items-center ${
+                                  isChosen
+                                    ? 'bg-foreground text-background border-foreground font-bold shadow-sm'
+                                    : 'border-border bg-muted/50 text-foreground hover:bg-muted'
+                                }`}>
+                                <span className="font-semibold">{gradeLetter}</span>
+                                <span className={`text-[10px] ${isChosen ? 'text-background/80' : 'text-muted-foreground'}`}>
+                                  {gradeVal}
+                                </span>
                               </button>
                             );
                           })}
@@ -1210,43 +1137,39 @@ export default function GpaPage() {
               )}
             </section>
 
-            {/* REAL-TIME SUMMARY & ANALYTICS BAR */}
-            <div className="sticky bottom-6 mt-12 z-20">
-              <div className="rounded-2xl border border-neutral-700/80 bg-neutral-900/90 p-4 sm:p-5 backdrop-blur-2xl shadow-2xl">
+            {/* STICKY LIVE SUMMARY BAR */}
+            <div className="sticky bottom-6 mt-8 z-20">
+              <div className="rounded-[20px] border border-border bg-card/95 p-4 sm:p-5 backdrop-blur-xl shadow-xl">
                 <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-                  {/* Left: Overall score metrics */}
                   <div className="flex items-center gap-4">
-                    <div className="flex h-16 w-16 shrink-0 flex-col items-center justify-center rounded-2xl bg-gradient-to-br from-indigo-500 to-purple-600 text-white shadow-xl shadow-indigo-500/25">
-                      <span className="text-2xl font-black tracking-tight">{calculation.sgpa}</span>
-                      <span className="text-[10px] font-semibold uppercase tracking-wider text-white/80">SGPA</span>
+                    <div className="flex h-14 w-14 shrink-0 flex-col items-center justify-center rounded-xl bg-foreground text-background shadow-sm">
+                      <span className="text-xl font-bold">{calculation.sgpa}</span>
+                      <span className="text-[10px] font-medium uppercase tracking-wider text-background/80">SGPA</span>
                     </div>
 
                     <div>
                       <div className="flex items-center gap-2">
-                        <span className="font-bold text-white text-base">Semester {selectedSemester} Summary</span>
-                        <span
-                          className="rounded-full px-2 py-0.5 text-[11px] font-semibold"
-                          style={{backgroundColor: `${performance.color}20`, color: performance.color}}>
+                        <span className="font-semibold text-foreground text-base">Semester {selectedSemester} Summary</span>
+                        <span className="rounded-full bg-muted px-2.5 py-0.5 text-xs text-muted-foreground">
                           {performance.text}
                         </span>
                       </div>
-                      <div className="mt-1 flex items-center gap-3 text-xs text-neutral-400">
+                      <div className="mt-1 flex items-center gap-3 text-xs text-muted-foreground">
                         <span>
-                          Credits: <strong className="text-white">{calculation.earnedCredits}</strong> / {calculation.totalCredits}
+                          Credits: <strong className="text-foreground">{calculation.earnedCredits}</strong> / {calculation.totalCredits}
                         </span>
                         <span>•</span>
                         <span>
-                          Subjects: <strong className="text-white">{calculation.gradedCount}</strong> / {calculation.totalSubjects}
+                          Subjects: <strong className="text-foreground">{calculation.gradedCount}</strong> / {calculation.totalSubjects}
                         </span>
                         <span>•</span>
                         <span>
-                          Total Points: <strong className="text-white">{calculation.totalWeightedPoints}</strong>
+                          Grade Points: <strong className="text-foreground">{calculation.totalWeightedPoints}</strong>
                         </span>
                       </div>
                     </div>
                   </div>
 
-                  {/* Right actions */}
                   <div className="flex items-center gap-2.5">
                     <button
                       type="button"
@@ -1255,13 +1178,13 @@ export default function GpaPage() {
                         navigator.clipboard?.writeText(summary);
                         alert('GPA summary copied to clipboard!');
                       }}
-                      className="rounded-xl border border-neutral-700 bg-neutral-800 px-4 py-2.5 text-xs font-semibold text-white hover:bg-neutral-750 transition-colors shadow-sm">
+                      className="rounded-xl bg-muted px-4 py-2 text-sm font-medium text-foreground hover:bg-muted/70 transition-colors">
                       Copy Result
                     </button>
                     <button
                       type="button"
                       onClick={() => window.print()}
-                      className="rounded-xl bg-indigo-600 px-4 py-2.5 text-xs font-semibold text-white hover:bg-indigo-500 transition-colors shadow-lg shadow-indigo-600/30">
+                      className="rounded-xl bg-foreground px-4 py-2 text-sm font-medium text-background hover:opacity-90 transition-opacity">
                       Print / PDF
                     </button>
                   </div>
@@ -1271,141 +1194,135 @@ export default function GpaPage() {
           </>
         ) : (
           /* CGPA CALCULATOR VIEW */
-          <section className="mt-8">
-            <div className="rounded-3xl border border-neutral-800 bg-neutral-900/60 p-6 sm:p-8 backdrop-blur-xl">
-              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 pb-6 border-b border-neutral-800">
-                <div>
-                  <h2 className="text-xl font-bold text-white">Cumulative GPA (CGPA) Calculator</h2>
-                  <p className="text-sm text-neutral-400 mt-1">
-                    Enter your SGPA and total credits for each completed semester.
-                  </p>
-                </div>
-                <div className="flex items-center gap-3 bg-neutral-850 px-4 py-3 rounded-2xl border border-neutral-750">
-                  <span className="text-xs text-neutral-400">Calculated CGPA:</span>
-                  <span className="text-2xl font-black text-indigo-400">{cgpaResult.cgpa}</span>
-                </div>
+          <section className="flex flex-col gap-6 rounded-[20px] border border-border bg-card p-6 shadow-sm">
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 border-b border-border pb-6">
+              <div>
+                <h2 className="text-xl font-semibold tracking-tight">Cumulative GPA (CGPA) Calculator</h2>
+                <p className="text-sm text-muted-foreground mt-1">
+                  Enter your SGPA and total credits for each completed semester.
+                </p>
               </div>
+              <div className="flex items-center gap-3 rounded-xl bg-muted px-4 py-3">
+                <span className="text-sm text-muted-foreground">Overall CGPA:</span>
+                <span className="text-2xl font-bold text-foreground">{cgpaResult.cgpa}</span>
+              </div>
+            </div>
 
-              {/* CGPA Semester Rows */}
-              <div className="mt-6 flex flex-col gap-3">
-                {cgpaEntries.map((entry, index) => (
-                  <div
-                    key={index}
-                    className="grid grid-cols-1 sm:grid-cols-3 gap-3 items-center rounded-2xl border border-neutral-800/80 bg-neutral-900/90 p-4">
-                    <div className="font-semibold text-sm text-white flex items-center gap-2">
-                      <span className="h-2 w-2 rounded-full bg-indigo-500" />
-                      Semester {entry.sem}
-                    </div>
-                    <div>
-                      <label className="text-[11px] uppercase tracking-wider text-neutral-400 block mb-1">
-                        SGPA (Out of 10)
-                      </label>
-                      <input
-                        type="number"
-                        step="0.01"
-                        min="0"
-                        max="10"
-                        placeholder="e.g. 8.75"
-                        value={entry.gpa}
-                        onChange={e => {
-                          const val = e.target.value;
-                          setCgpaEntries(prev => {
-                            const updated = [...prev];
-                            updated[index].gpa = val;
-                            return updated;
-                          });
-                        }}
-                        className="w-full rounded-xl border border-neutral-700 bg-neutral-950 px-3 py-2 text-sm text-white focus:border-indigo-500 focus:outline-none"
-                      />
-                    </div>
-                    <div>
-                      <label className="text-[11px] uppercase tracking-wider text-neutral-400 block mb-1">
-                        Semester Credits
-                      </label>
-                      <input
-                        type="number"
-                        step="1"
-                        min="1"
-                        max="35"
-                        placeholder="e.g. 21"
-                        value={entry.credits}
-                        onChange={e => {
-                          const val = e.target.value;
-                          setCgpaEntries(prev => {
-                            const updated = [...prev];
-                            updated[index].credits = val;
-                            return updated;
-                          });
-                        }}
-                        className="w-full rounded-xl border border-neutral-700 bg-neutral-950 px-3 py-2 text-sm text-white focus:border-indigo-500 focus:outline-none"
-                      />
-                    </div>
+            <div className="flex flex-col gap-3">
+              {cgpaEntries.map((entry, index) => (
+                <div
+                  key={index}
+                  className="grid grid-cols-1 sm:grid-cols-3 gap-3 items-center rounded-xl border border-border bg-muted/20 p-4">
+                  <div className="font-medium text-sm text-foreground">
+                    Semester {entry.sem}
                   </div>
-                ))}
-              </div>
-
-              <div className="mt-6 flex items-center justify-between">
-                <button
-                  type="button"
-                  onClick={() => {
-                    setCgpaEntries(prev => [
-                      ...prev,
-                      {sem: String(prev.length + 1), gpa: '', credits: '21'},
-                    ]);
-                  }}
-                  className="rounded-xl border border-neutral-700 bg-neutral-800/80 px-4 py-2 text-xs font-semibold text-white hover:bg-neutral-750 transition-colors">
-                  + Add Another Semester
-                </button>
-                <div className="text-xs text-neutral-400">
-                  Total Credits Accounted: <strong className="text-white">{cgpaResult.totalCreds}</strong>
+                  <div>
+                    <label className="text-xs text-muted-foreground block mb-1">SGPA (0 - 10)</label>
+                    <input
+                      type="number"
+                      step="0.01"
+                      min="0"
+                      max="10"
+                      placeholder="e.g. 8.75"
+                      value={entry.gpa}
+                      onChange={e => {
+                        const val = e.target.value;
+                        setCgpaEntries(prev => {
+                          const updated = [...prev];
+                          updated[index].gpa = val;
+                          return updated;
+                        });
+                      }}
+                      className="w-full rounded-xl border border-input bg-background px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-1 focus:ring-ring"
+                    />
+                  </div>
+                  <div>
+                    <label className="text-xs text-muted-foreground block mb-1">Semester Credits</label>
+                    <input
+                      type="number"
+                      step="1"
+                      min="1"
+                      max="35"
+                      placeholder="e.g. 21"
+                      value={entry.credits}
+                      onChange={e => {
+                        const val = e.target.value;
+                        setCgpaEntries(prev => {
+                          const updated = [...prev];
+                          updated[index].credits = val;
+                          return updated;
+                        });
+                      }}
+                      className="w-full rounded-xl border border-input bg-background px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-1 focus:ring-ring"
+                    />
+                  </div>
                 </div>
+              ))}
+            </div>
+
+            <div className="flex items-center justify-between pt-2">
+              <button
+                type="button"
+                onClick={() => {
+                  setCgpaEntries(prev => [
+                    ...prev,
+                    {sem: String(prev.length + 1), gpa: '', credits: '21'},
+                  ]);
+                }}
+                className="rounded-xl bg-muted px-4 py-2 text-sm font-medium text-foreground hover:bg-muted/70 transition-colors">
+                + Add Semester
+              </button>
+              <div className="text-sm text-muted-foreground">
+                Total Credits Accounted: <strong className="text-foreground">{cgpaResult.totalCreds}</strong>
               </div>
             </div>
           </section>
         )}
 
         {/* Academic Grading Scale Reference Guide */}
-        <section className="mt-12 rounded-3xl border border-neutral-800 bg-neutral-900/40 p-6 backdrop-blur-md">
-          <h3 className="text-sm font-bold text-white mb-3">Academic Grading System & Grade Points Reference</h3>
-          <div className="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-7 gap-2.5 text-center text-xs">
-            <div className="rounded-xl border border-emerald-500/20 bg-emerald-500/5 p-3">
-              <div className="text-lg font-black text-emerald-400">O</div>
-              <div className="font-semibold text-white">Outstanding</div>
-              <div className="text-neutral-400 mt-1 font-mono">10 Points</div>
+        <section className="rounded-[20px] border border-border bg-card p-6 shadow-sm">
+          <h3 className="text-base font-semibold text-foreground mb-4">
+            Academic Grading Scale Reference (Regulation 2023)
+          </h3>
+          <div className="grid grid-cols-2 gap-3 sm:grid-cols-4 md:grid-cols-7 text-center">
+            <div className="rounded-xl border border-border bg-muted/30 p-3">
+              <div className="text-xl font-bold text-foreground">O</div>
+              <div className="text-xs font-medium text-foreground">Outstanding</div>
+              <div className="text-xs text-muted-foreground mt-1 font-mono">10 Points</div>
             </div>
-            <div className="rounded-xl border border-blue-500/20 bg-blue-500/5 p-3">
-              <div className="text-lg font-black text-blue-400">A+</div>
-              <div className="font-semibold text-white">Excellent</div>
-              <div className="text-neutral-400 mt-1 font-mono">9 Points</div>
+            <div className="rounded-xl border border-border bg-muted/30 p-3">
+              <div className="text-xl font-bold text-foreground">A+</div>
+              <div className="text-xs font-medium text-foreground">Excellent</div>
+              <div className="text-xs text-muted-foreground mt-1 font-mono">9 Points</div>
             </div>
-            <div className="rounded-xl border border-cyan-500/20 bg-cyan-500/5 p-3">
-              <div className="text-lg font-black text-cyan-400">A</div>
-              <div className="font-semibold text-white">Very Good</div>
-              <div className="text-neutral-400 mt-1 font-mono">8 Points</div>
+            <div className="rounded-xl border border-border bg-muted/30 p-3">
+              <div className="text-xl font-bold text-foreground">A</div>
+              <div className="text-xs font-medium text-foreground">Very Good</div>
+              <div className="text-xs text-muted-foreground mt-1 font-mono">8 Points</div>
             </div>
-            <div className="rounded-xl border border-amber-500/20 bg-amber-500/5 p-3">
-              <div className="text-lg font-black text-amber-400">B+</div>
-              <div className="font-semibold text-white">Good</div>
-              <div className="text-neutral-400 mt-1 font-mono">7 Points</div>
+            <div className="rounded-xl border border-border bg-muted/30 p-3">
+              <div className="text-xl font-bold text-foreground">B+</div>
+              <div className="text-xs font-medium text-foreground">Good</div>
+              <div className="text-xs text-muted-foreground mt-1 font-mono">7 Points</div>
             </div>
-            <div className="rounded-xl border border-yellow-500/20 bg-yellow-500/5 p-3">
-              <div className="text-lg font-black text-yellow-400">B</div>
-              <div className="font-semibold text-white">Above Average</div>
-              <div className="text-neutral-400 mt-1 font-mono">6 Points</div>
+            <div className="rounded-xl border border-border bg-muted/30 p-3">
+              <div className="text-xl font-bold text-foreground">B</div>
+              <div className="text-xs font-medium text-foreground">Above Average</div>
+              <div className="text-xs text-muted-foreground mt-1 font-mono">6 Points</div>
             </div>
-            <div className="rounded-xl border border-orange-500/20 bg-orange-500/5 p-3">
-              <div className="text-lg font-black text-orange-400">C</div>
-              <div className="font-semibold text-white">Average</div>
-              <div className="text-neutral-400 mt-1 font-mono">5 Points</div>
+            <div className="rounded-xl border border-border bg-muted/30 p-3">
+              <div className="text-xl font-bold text-foreground">C</div>
+              <div className="text-xs font-medium text-foreground">Average</div>
+              <div className="text-xs text-muted-foreground mt-1 font-mono">5 Points</div>
             </div>
-            <div className="rounded-xl border border-red-500/20 bg-red-500/5 p-3">
-              <div className="text-lg font-black text-red-400">U</div>
-              <div className="font-semibold text-white">Re-appear</div>
-              <div className="text-neutral-400 mt-1 font-mono">0 Points</div>
+            <div className="rounded-xl border border-border bg-muted/30 p-3">
+              <div className="text-xl font-bold text-destructive">U</div>
+              <div className="text-xs font-medium text-destructive">Re-appear</div>
+              <div className="text-xs text-muted-foreground mt-1 font-mono">0 Points</div>
             </div>
           </div>
         </section>
       </div>
-    </div>
+    </main>
   );
 }
