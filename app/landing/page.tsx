@@ -99,7 +99,9 @@ function TooltipLink({tool}: {tool: Tool}) {
         {tool.tooltip}
       </span>
       <Link href={tool.href} isStandalone>
-        {tool.label}
+        <span className="text-foreground font-medium hover:underline">
+          {tool.label}
+        </span>
       </Link>
     </div>
   );

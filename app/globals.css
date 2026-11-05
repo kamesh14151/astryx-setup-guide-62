@@ -162,6 +162,22 @@
   color: rgba(255, 255, 255, 0.70) !important;
 }
 
+/* Links in dark mode */
+.dark a,
+.dark a:visited,
+.dark [class*="link"],
+.dark [class*="Link"],
+.dark [role="link"] {
+  color: #ffffff !important;
+}
+
+.dark a:hover,
+.dark [class*="link"]:hover,
+.dark [class*="Link"]:hover,
+.dark [role="link"]:hover {
+  color: #f1f1f1 !important;
+}
+
 @media (prefers-color-scheme: dark) {
   :root:not(.light) {
     color-scheme: dark;
