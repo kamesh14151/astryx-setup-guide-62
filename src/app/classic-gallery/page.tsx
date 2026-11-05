@@ -1,6 +1,7 @@
 'use client';
 
 import {useEffect, useState} from 'react';
+import {SmartImage} from '../../components/smart-image';
 
 // ─── Types ──────────────────────────────────────────────────────────────────
 
@@ -27,25 +28,75 @@ const ALT_BY_CATEGORY: Record<string, string> = {
 
 // ─── Image card ─────────────────────────────────────────────────────────────
 
-function GalleryCard({image}: {image: GalleryImage}) {
+function GalleryCard({
+  image,
+  onOpen,
+}: {
+  image: GalleryImage;
+  onOpen: (image: GalleryImage) => void;
+}) {
   const [failed, setFailed] = useState(false);
 
   return (
-    <div className="relative aspect-[3/2] overflow-hidden rounded-[20px] bg-gradient-to-br from-neutral-800 to-neutral-950">
+    <button
+      type="button"
+      onClick={() => onOpen(image)}
+      aria-label={`Open ${image.alt}`}
+      className="relative block aspect-[3/2] w-full cursor-zoom-in overflow-hidden rounded-[20px] bg-gradient-to-br from-neutral-800 to-neutral-950 focus-visible:ring-3 focus-visible:ring-ring/50 focus-visible:outline-none">
       {!failed && (
-        // eslint-disable-next-line @next/next/no-img-element
-        <img
+        <SmartImage
           src={image.src}
           alt={image.alt}
-          loading="lazy"
-          onError={() => setFailed(true)}
-          ref={el => {
-            // Catches images that failed before the page hydrated.
-            if (el && el.complete && el.naturalWidth === 0) setFailed(true);
-          }}
-          className="absolute inset-0 h-full w-full object-cover"
+          onFail={() => setFailed(true)}
+          className="absolute inset-0"
         />
       )}
+    </button>
+  );
+}
+
+// Full-size view, so a portrait photo can be seen whole (nothing cropped).
+function Lightbox({
+  image,
+  onClose,
+}: {
+  image: GalleryImage;
+  onClose: () => void;
+}) {
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') onClose();
+    };
+    window.addEventListener('keydown', onKey);
+    const previous = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    return () => {
+      window.removeEventListener('keydown', onKey);
+      document.body.style.overflow = previous;
+    };
+  }, [onClose]);
+
+  return (
+    <div
+      role="dialog"
+      aria-modal="true"
+      aria-label={image.alt}
+      onClick={onClose}
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 p-4 sm:p-8">
+      <button
+        type="button"
+        onClick={onClose}
+        aria-label="Close"
+        className="absolute top-4 right-4 flex size-10 cursor-pointer items-center justify-center rounded-full bg-white/15 text-2xl leading-none text-white hover:bg-white/25 focus-visible:ring-3 focus-visible:ring-white/50 focus-visible:outline-none">
+        ×
+      </button>
+      {/* eslint-disable-next-line @next/next/no-img-element */}
+      <img
+        src={image.src}
+        alt={image.alt}
+        onClick={e => e.stopPropagation()}
+        className="max-h-full max-w-full rounded-xl object-contain"
+      />
     </div>
   );
 }
@@ -56,6 +107,7 @@ export default function ClassicGalleryTemplate() {
   const [filter, setFilter] = useState<Category>('all');
   const [images, setImages] = useState<GalleryImage[]>([]);
   const [loading, setLoading] = useState(true);
+  const [open, setOpen] = useState<GalleryImage | null>(null);
 
   // Load the images that were uploaded on /upload (stored in Vercel Blob).
   useEffect(() => {
@@ -140,11 +192,12 @@ export default function ClassicGalleryTemplate() {
         ) : (
           <section className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
             {filteredImages.map(image => (
-              <GalleryCard key={image.src} image={image} />
+              <GalleryCard key={image.src} image={image} onOpen={setOpen} />
             ))}
           </section>
         )}
       </div>
+      {open && <Lightbox image={open} onClose={() => setOpen(null)} />}
     </main>
   );
 }

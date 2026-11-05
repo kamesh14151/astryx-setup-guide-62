@@ -6,7 +6,13 @@ export const dynamic = 'force-dynamic';
 // Returns every image in the Blob store under gallery/<category>/<file>,
 // newest first. The category comes from the folder name.
 export async function GET() {
-  const images: {url: string; pathname: string; category: string; uploadedAt: string}[] = [];
+  const images: {
+    url: string;
+    pathname: string;
+    category: string;
+    uploadedAt: string;
+    size: number;
+  }[] = [];
   let cursor: string | undefined;
 
   do {
@@ -19,6 +25,7 @@ export async function GET() {
         pathname: blob.pathname,
         category,
         uploadedAt: blob.uploadedAt.toISOString(),
+        size: blob.size,
       });
     }
     cursor = page.hasMore ? page.cursor : undefined;
