@@ -3,6 +3,20 @@
 import {useState, useMemo} from 'react';
 import Link from 'next/link';
 import {Table} from '@astryxdesign/core/Table';
+import {SelectableCard} from '@astryxdesign/core/SelectableCard';
+import {Grid} from '@astryxdesign/core/Grid';
+import {Text} from '@astryxdesign/core/Text';
+
+const SEMESTER_OPTIONS = [
+  {id: '1', name: 'Semester 1', variant: 'blue' as const},
+  {id: '2', name: 'Semester 2', variant: 'cyan' as const},
+  {id: '3', name: 'Semester 3', variant: 'teal' as const},
+  {id: '4', name: 'Semester 4', variant: 'green' as const},
+  {id: '5', name: 'Semester 5', variant: 'yellow' as const},
+  {id: '6', name: 'Semester 6', variant: 'orange' as const},
+  {id: '7', name: 'Semester 7', variant: 'teal' as const},
+  {id: '8', name: 'Semester 8', variant: 'blue' as const},
+];
 
 // ─── Data Definitions ────────────────────────────────────────────────────────
 
@@ -935,33 +949,35 @@ export default function GpaPage() {
                 </span>
               </div>
 
-              <div className="grid grid-cols-4 gap-2 sm:grid-cols-8">
-                {['1', '2', '3', '4', '5', '6', '7', '8'].map(sem => {
-                  const isSelected = selectedSemester === sem;
-                  const subjects = activeDepartment.semesters[sem] ?? [];
+              <Grid columns={{minWidth: 105, repeat: 'fit'}} gap={2}>
+                {SEMESTER_OPTIONS.map(sem => {
+                  const isSelected = selectedSemester === sem.id;
+                  const subjects = activeDepartment.semesters[sem.id] ?? [];
                   const hasData = subjects.length > 0;
 
                   return (
-                    <button
-                      key={sem}
-                      type="button"
-                      onClick={() => handleSelectSemester(sem)}
-                      className={`flex flex-col items-center justify-center rounded-xl py-3 px-2 border transition-colors ${
-                        isSelected
-                          ? 'border-foreground bg-foreground text-background font-semibold shadow-sm'
-                          : 'border-border bg-card text-foreground hover:bg-muted/70'
-                      }`}>
-                      <span className={`text-[10px] uppercase tracking-wider ${isSelected ? 'text-background/80' : 'text-muted-foreground'}`}>
-                        Sem
-                      </span>
-                      <span className="text-xl font-bold">{sem}</span>
-                      <span className={`text-[11px] ${isSelected ? 'text-background/80' : 'text-muted-foreground'}`}>
-                        {hasData ? `${subjects.length} sub` : 'Custom'}
-                      </span>
-                    </button>
+                    <SelectableCard
+                      key={sem.id}
+                      label={sem.name}
+                      isSelected={isSelected}
+                      variant={sem.variant}
+                      onChange={isNow => {
+                        if (isNow) {
+                          handleSelectSemester(sem.id);
+                        }
+                      }}>
+                      <div className="flex flex-col items-center justify-center py-1 text-center w-full">
+                        <Text type="body" weight="bold">
+                          Sem {sem.id}
+                        </Text>
+                        <span className="text-[11px] text-muted-foreground mt-0.5">
+                          {hasData ? `${subjects.length} courses` : 'Custom'}
+                        </span>
+                      </div>
+                    </SelectableCard>
                   );
                 })}
-              </div>
+              </Grid>
             </section>
 
             {/* STEP 3: Subjects & Grade Assignment */}
