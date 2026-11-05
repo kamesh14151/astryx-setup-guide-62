@@ -164,9 +164,9 @@ export default function ClassicGalleryTemplate() {
           <span className="text-sm font-medium tracking-tight">Classic Gallery</span>
           <div className="flex items-center gap-3">
             <Link
-              href="/images-history"
+              href="/history"
               className="rounded-lg px-3 py-1.5 text-xs font-medium text-muted-foreground transition-colors hover:bg-muted hover:text-foreground">
-              Images History
+              History
             </Link>
             <Link
               href="/upload"

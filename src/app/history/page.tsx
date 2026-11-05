@@ -6,9 +6,9 @@
  * a row opens to a large preview with the file's link. Signed-in only (the
  * server wrapper in app/history/page.tsx redirects to /login).
  *
- * Built from the "connected accounts" template, simplified: the groups here
- * share one column set, sizes are real byte counts, and the time range
- * filters on upload date.
+ * Everything shown is real: names, dates and sizes come from Vercel Blob, and
+ * dimensions come from the size the upload page records in each file name
+ * (older uploads show a dash). The time range filters on upload date.
  */
 
 import {
@@ -25,7 +25,7 @@ import {
 } from 'react';
 import {useRouter} from 'next/navigation';
 import {SmartImage} from '../../components/smart-image';
-import {cleanName} from '../../lib/image-meta';
+import {cleanName, parseDims, shapeOf, type Shape} from '../../lib/image-meta';
 
 import {
   HStack,
@@ -75,6 +75,10 @@ interface ImageRecord extends Record<string, unknown> {
   category: CategoryId;
   uploadedAt: number;
   sizeBytes: number;
+  width?: number;
+  height?: number;
+  shape?: Shape;
+  format: string;
 }
 
 interface ApiImage {
@@ -110,10 +114,16 @@ function toRecord(image: ApiImage): ImageRecord | null {
   if (!isCategory(image.category)) {
     return null;
   }
+  const dims = parseDims(image.pathname);
+  const name = displayName(image.pathname);
   return {
     id: image.pathname,
     url: image.url,
-    name: displayName(image.pathname),
+    name,
+    width: dims?.width,
+    height: dims?.height,
+    shape: dims ? shapeOf(dims.width, dims.height) : undefined,
+    format: (name.split('.').pop() ?? '').toUpperCase(),
     path: image.pathname,
     category: image.category,
     uploadedAt: new Date(image.uploadedAt).getTime(),
@@ -192,6 +202,7 @@ const tileStyle: CSSProperties = {
 };
 const washStyle: CSSProperties = {
   backgroundColor: 'var(--color-background-body)',
+  minHeight: '100dvh',
 };
 const thumbBox = (w: number, h: number): CSSProperties => ({
   width: w,
@@ -254,16 +265,25 @@ function Thumb({
   );
 }
 
+const SHAPE_LABEL: Record<Shape, string> = {
+  portrait: 'Portrait',
+  landscape: 'Landscape',
+  square: 'Square',
+};
+
 function NameCell({item, showMeta, now}: {item: ImageRecord; showMeta?: boolean; now: number}) {
+  const meta = [item.format, item.shape ? SHAPE_LABEL[item.shape] : null]
+    .filter(Boolean)
+    .join(' · ');
   return (
     <HStack gap={3} vAlign="center">
       <Thumb url={item.url} alt={item.name} width={56} height={40} />
       <VStack gap={0}>
-        <Text>{item.name}</Text>
-        <Text type="supporting">
+        <Text maxLines={1}>{item.name}</Text>
+        <Text type="supporting" maxLines={1}>
           {showMeta
             ? `${formatBytes(item.sizeBytes)} · ${relativeTime(item.uploadedAt, now)}`
-            : item.path}
+            : meta}
         </Text>
       </VStack>
     </HStack>
@@ -337,6 +357,18 @@ function buildColumns({
       ),
     },
     {
+      key: 'dimensions',
+      sortable: true,
+      header: 'Dimensions',
+      width: pixel(130),
+      renderCell: item =>
+        item.width && item.height ? (
+          <Figure>{`${item.width} × ${item.height}`}</Figure>
+        ) : (
+          <Text color="secondary">—</Text>
+        ),
+    },
+    {
       key: 'size',
       sortable: true,
       header: 'Size',
@@ -351,6 +383,7 @@ function buildColumns({
 const comparators: Partial<Record<string, TableSortComparator<ImageRecord>>> = {
   name: (a, b) => a.name.localeCompare(b.name),
   uploaded: (a, b) => a.uploadedAt - b.uploadedAt,
+  dimensions: (a, b) => (a.width ?? 0) * (a.height ?? 0) - (b.width ?? 0) * (b.height ?? 0),
   size: (a, b) => a.sizeBytes - b.sizeBytes,
 };
 
