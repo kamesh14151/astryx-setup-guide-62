@@ -28,7 +28,7 @@ const TOOLS = [
     tooltip: 'Go to Upload — manage and upload your files',
   },
   {
-    src: '/template-assets/colorful-lifestyle-horizontal-2.png',
+    src: '/template-assets/light-working-vertical-2.png',
     alt: 'Colorful lifestyle scene with warm tones',
     href: '/gpa',
     label: 'GPA Calculator',
