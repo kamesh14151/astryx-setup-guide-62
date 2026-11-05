@@ -2,6 +2,7 @@
 
 import type {CSSProperties} from 'react';
 import {useState} from 'react';
+import {useRouter} from 'next/navigation';
 import {VStack, HStack, Layout, LayoutContent} from '@astryxdesign/core/Layout';
 import {Text, Heading} from '@astryxdesign/core/Text';
 import {Button} from '@astryxdesign/core/Button';
@@ -193,7 +194,9 @@ function ImageModal({tool, onClose}: {tool: Tool; onClose: () => void}) {
 }
 
 export default function LandingPage() {
+  const router = useRouter();
   const [previewTool, setPreviewTool] = useState<Tool | null>(null);
+  const [learnMoreTooltip, setLearnMoreTooltip] = useState(false);
 
   return (
     <>
@@ -228,7 +231,24 @@ export default function LandingPage() {
                       <Icon icon={ArrowRightIcon} size="sm" color="inherit" />
                     }
                   />
-                  <Button label="Learn more" variant="secondary" />
+                  {/* Learn more → /contact with tooltip */}
+                  <div
+                    style={{position: 'relative', display: 'inline-flex'}}
+                    onMouseEnter={() => setLearnMoreTooltip(true)}
+                    onMouseLeave={() => setLearnMoreTooltip(false)}>
+                    <span
+                      style={{
+                        ...tooltipBubble,
+                        opacity: learnMoreTooltip ? 1 : 0,
+                      }}>
+                      Visit our contact page
+                    </span>
+                    <Button
+                      label="Learn more"
+                      variant="secondary"
+                      onPress={() => router.push('/contact')}
+                    />
+                  </div>
                 </HStack>
               </VStack>
 
