@@ -2,6 +2,12 @@
 
 import {useEffect, useState} from 'react';
 import {SmartImage} from '../../components/smart-image';
+import {
+  SHAPE_ASPECT,
+  parseDims,
+  shapeOf,
+  type Shape,
+} from '../../lib/image-meta';
 
 // ─── Types ──────────────────────────────────────────────────────────────────
 
@@ -11,6 +17,8 @@ interface GalleryImage {
   src: string;
   alt: string;
   category: string;
+  /** Known from the file name; undefined for photos uploaded before that. */
+  shape?: Shape;
 }
 
 const TABS: {value: Category; label: string}[] = [
@@ -36,19 +44,25 @@ function GalleryCard({
   onOpen: (image: GalleryImage) => void;
 }) {
   const [failed, setFailed] = useState(false);
-  const isPortrait = image.category === 'lifestyle';
+  // Older uploads carry no size in their name, so learn it once the photo loads.
+  const [loadedShape, setLoadedShape] = useState<Shape | undefined>();
+  const shape = image.shape ?? loadedShape ?? 'landscape';
 
   return (
     <button
       type="button"
       onClick={() => onOpen(image)}
       aria-label={`Open ${image.alt}`}
-      className="relative block aspect-[3/2] w-full cursor-zoom-in overflow-hidden rounded-[20px] bg-gradient-to-br from-neutral-800 to-neutral-950 focus-visible:ring-3 focus-visible:ring-ring/50 focus-visible:outline-none">
+      style={{aspectRatio: SHAPE_ASPECT[shape]}}
+      className="relative mb-4 block w-full cursor-zoom-in break-inside-avoid overflow-hidden rounded-[20px] bg-gradient-to-br from-neutral-800 to-neutral-950 focus-visible:ring-3 focus-visible:ring-ring/50 focus-visible:outline-none">
       {!failed && (
         <SmartImage
           src={image.src}
           alt={image.alt}
           onFail={() => setFailed(true)}
+          onDimensions={(w, h) => {
+            if (!image.shape) setLoadedShape(shapeOf(w, h));
+          }}
           className="absolute inset-0"
         />
       )}
@@ -118,11 +132,17 @@ export default function ClassicGalleryTemplate() {
       .then(data => {
         if (cancelled) return;
         setImages(
-          (data.images ?? []).map((img: {url: string; category: string}) => ({
-            src: img.url,
-            alt: ALT_BY_CATEGORY[img.category] ?? 'Gallery photo',
-            category: img.category,
-          })),
+          (data.images ?? []).map(
+            (img: {url: string; pathname: string; category: string}) => {
+              const dims = parseDims(img.pathname);
+              return {
+                src: img.url,
+                alt: ALT_BY_CATEGORY[img.category] ?? 'Gallery photo',
+                category: img.category,
+                shape: dims ? shapeOf(dims.width, dims.height) : undefined,
+              };
+            },
+          ),
         );
       })
       .catch(() => {})
@@ -208,7 +228,7 @@ export default function ClassicGalleryTemplate() {
             No images yet. Add some on the /upload page.
           </p>
         ) : (
-          <section className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+          <section className="columns-1 gap-4 sm:columns-2 lg:columns-3 xl:columns-4">
             {filteredImages.map(image => (
               <GalleryCard key={image.src} image={image} onOpen={setOpen} />
             ))}

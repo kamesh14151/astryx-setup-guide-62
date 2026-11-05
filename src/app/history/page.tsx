@@ -25,6 +25,7 @@ import {
 } from 'react';
 import {useRouter} from 'next/navigation';
 import {SmartImage} from '../../components/smart-image';
+import {cleanName} from '../../lib/image-meta';
 
 import {
   HStack,
@@ -100,10 +101,9 @@ function isCategory(value: string): value is CategoryId {
   return (CATEGORY_IDS as string[]).includes(value);
 }
 
-/** Vercel Blob adds a random suffix before the extension; hide it in the UI. */
+/** Folder, size marker and Blob's random suffix removed. */
 function displayName(pathname: string): string {
-  const file = pathname.split('/').pop() ?? pathname;
-  return file.replace(/-[A-Za-z0-9]{16,}(?=\.[A-Za-z0-9]+$)/, '');
+  return cleanName(pathname);
 }
 
 function toRecord(image: ApiImage): ImageRecord | null {

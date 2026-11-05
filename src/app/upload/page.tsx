@@ -14,6 +14,7 @@ import {
 import {Button} from '@/components/ui/button';
 import {formatBytes, useFileUpload} from '@/hooks/use-file-upload';
 import {SmartImage} from '../../components/smart-image';
+import {readDimensions, withDims} from '../../lib/image-meta';
 
 type Category = 'lifestyle' | 'scene' | 'home';
 type FileState = {status: 'queued' | 'uploading' | 'done' | 'error'; progress: number; error?: string};
@@ -97,7 +98,8 @@ export default function UploadPage() {
       const file = item.file as File;
       setFileState(item.id, {status: 'uploading', progress: 0, error: undefined});
       try {
-        await upload(`gallery/${category}/${file.name}`, file, {
+        const dims = await readDimensions(file);
+        await upload(`gallery/${category}/${withDims(file.name, dims)}`, file, {
           access: 'public',
           handleUploadUrl: '/api/upload',
           multipart: file.size > 8 * 1024 * 1024,

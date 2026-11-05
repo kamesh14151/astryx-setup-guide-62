@@ -21,6 +21,7 @@ export function SmartImage({
   style,
   className,
   onFail,
+  onDimensions,
 }: {
   src: string
   alt: string
@@ -28,6 +29,7 @@ export function SmartImage({
   style?: CSSProperties
   className?: string
   onFail?: () => void
+  onDimensions?: (width: number, height: number) => void
 }) {
   const [position, setPosition] = useState('50% 50%')
 
@@ -48,6 +50,7 @@ export function SmartImage({
       }}
       onLoad={e => {
         const img = e.currentTarget
+        onDimensions?.(img.naturalWidth, img.naturalHeight)
         if (img.naturalHeight > img.naturalWidth * 1.05) {
           setPosition(`50% ${portraitFocus}%`)
         }
@@ -56,7 +59,10 @@ export function SmartImage({
       ref={el => {
         if (!el) return
         if (el.complete && el.naturalWidth === 0) onFail?.()
-        else if (el.complete && el.naturalHeight > el.naturalWidth * 1.05) {
+        else if (el.complete && el.naturalWidth > 0) {
+          onDimensions?.(el.naturalWidth, el.naturalHeight)
+        }
+        if (el.complete && el.naturalWidth > 0 && el.naturalHeight > el.naturalWidth * 1.05) {
           setPosition(prev => (prev === '50% 50%' ? `50% ${portraitFocus}%` : prev))
         }
       }}
