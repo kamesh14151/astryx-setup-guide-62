@@ -14,7 +14,7 @@ import {ArrowRightIcon} from '@heroicons/react/20/solid';
 
 const TOOLS = [
   {
-    src: '/https-astryx-setup-guide.vercel.app-kanban.png',
+    src: '/images.jpeg',
     alt: 'Kanban board tool screenshot',
     href: '/kanban',
     label: 'Kanban Board',
