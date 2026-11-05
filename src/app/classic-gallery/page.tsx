@@ -36,6 +36,7 @@ function GalleryCard({
   onOpen: (image: GalleryImage) => void;
 }) {
   const [failed, setFailed] = useState(false);
+  const isPortrait = image.category === 'lifestyle';
 
   return (
     <button
@@ -136,7 +137,24 @@ export default function ClassicGalleryTemplate() {
 
   return (
     <main className="min-h-screen w-full bg-background text-foreground">
-      <div className="mx-auto flex w-full max-w-[1200px] flex-col gap-12 px-6 py-16">
+      <div className="mx-auto flex w-full max-w-[1200px] flex-col gap-12 px-6 py-12">
+        {/* Top bar */}
+        <div className="flex items-center justify-between border-b border-border/40 pb-4">
+          <span className="text-sm font-medium tracking-tight">Classic Gallery</span>
+          <div className="flex items-center gap-3">
+            <Link
+              href="/images-history"
+              className="rounded-lg px-3 py-1.5 text-xs font-medium text-muted-foreground transition-colors hover:bg-muted hover:text-foreground">
+              Images History
+            </Link>
+            <Link
+              href="/upload"
+              className="rounded-lg bg-foreground px-3 py-1.5 text-xs font-medium text-background transition-opacity hover:opacity-90">
+              Upload
+            </Link>
+          </div>
+        </div>
+
         {/* Header */}
         <header className="mx-auto flex max-w-[680px] flex-col items-center gap-8 text-center">
           <div className="flex flex-col items-center gap-3">
