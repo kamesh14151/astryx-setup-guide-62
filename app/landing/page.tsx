@@ -17,18 +17,21 @@ const TOOLS = [
     alt: 'Colorful home interior with vibrant decor',
     href: '/kanban',
     label: 'Kanban Board',
+    tooltip: 'Go to Kanban Board — manage your tasks visually',
   },
   {
     src: '/template-assets/colorful-lifestyle-horizontal-1.png',
     alt: 'Colorful lifestyle portrait with natural lighting',
     href: '/upload',
     label: 'Upload',
+    tooltip: 'Go to Upload — manage and upload your files',
   },
   {
     src: '/template-assets/colorful-lifestyle-horizontal-2.png',
     alt: 'Colorful lifestyle scene with warm tones',
     href: '/gpa',
     label: 'GPA Calculator',
+    tooltip: 'Go to GPA Calculator — track your academic grades',
   },
 ];
 
@@ -51,6 +54,37 @@ const galleryImageClip: CSSProperties = {
   overflow: 'hidden',
 };
 
+// Card label above each image — bigger, bolder
+const cardTitle: CSSProperties = {
+  fontSize: '1.125rem',
+  fontWeight: 700,
+  letterSpacing: '-0.01em',
+  color: 'var(--color-text-primary)',
+};
+
+// Tooltip wrapper for the link
+const tooltipWrapper: CSSProperties = {
+  position: 'relative',
+  display: 'inline-flex',
+};
+
+const tooltipBubble: CSSProperties = {
+  position: 'absolute',
+  bottom: 'calc(100% + 6px)',
+  left: '50%',
+  transform: 'translateX(-50%)',
+  whiteSpace: 'nowrap',
+  backgroundColor: 'var(--color-surface-overlay, #1a1a1a)',
+  color: '#fff',
+  fontSize: '0.75rem',
+  padding: '0.3rem 0.6rem',
+  borderRadius: '6px',
+  pointerEvents: 'none',
+  opacity: 0,
+  transition: 'opacity 0.15s ease',
+  zIndex: 10,
+};
+
 // Modal backdrop
 const modalBackdrop: CSSProperties = {
   position: 'fixed',
@@ -63,7 +97,6 @@ const modalBackdrop: CSSProperties = {
   padding: '1.5rem',
 };
 
-// Modal content box
 const modalBox: CSSProperties = {
   position: 'relative',
   maxWidth: '90vw',
@@ -73,7 +106,6 @@ const modalBox: CSSProperties = {
   gap: '0.75rem',
 };
 
-// Full-size preview image inside modal
 const modalImage: CSSProperties = {
   maxWidth: '100%',
   maxHeight: '80vh',
@@ -83,7 +115,6 @@ const modalImage: CSSProperties = {
   display: 'block',
 };
 
-// Top-right action bar inside modal
 const modalActions: CSSProperties = {
   position: 'absolute',
   top: '-2.75rem',
@@ -108,6 +139,27 @@ const iconBtn: CSSProperties = {
 
 type Tool = (typeof TOOLS)[number];
 
+function TooltipLink({tool}: {tool: Tool}) {
+  const [visible, setVisible] = useState(false);
+  return (
+    <div
+      style={tooltipWrapper}
+      onMouseEnter={() => setVisible(true)}
+      onMouseLeave={() => setVisible(false)}>
+      <span
+        style={{
+          ...tooltipBubble,
+          opacity: visible ? 1 : 0,
+        }}>
+        {tool.tooltip}
+      </span>
+      <Link href={tool.href} isStandalone>
+        {tool.label}
+      </Link>
+    </div>
+  );
+}
+
 function ImageModal({tool, onClose}: {tool: Tool; onClose: () => void}) {
   const handleDownload = async () => {
     const res = await fetch(tool.src);
@@ -121,9 +173,7 @@ function ImageModal({tool, onClose}: {tool: Tool; onClose: () => void}) {
   };
 
   return (
-    // Clicking the backdrop closes the modal
     <div style={modalBackdrop} onClick={onClose}>
-      {/* Stop propagation so clicking the image/box doesn't close */}
       <div style={modalBox} onClick={e => e.stopPropagation()}>
         <div style={modalActions}>
           <button style={iconBtn} onClick={handleDownload} title="Download">
@@ -182,17 +232,15 @@ export default function LandingPage() {
                 </HStack>
               </VStack>
 
-              {/* Tool cards — label above, image (click to preview), link below */}
-              <Grid columns={{minWidth: 200, repeat: 'fit'}} gap={4}>
+              {/* Tool cards — compact landscape images */}
+              <Grid columns={{minWidth: 240, repeat: 'fit'}} gap={6}>
                 {TOOLS.map(tool => (
                   <VStack key={tool.href} gap={2}>
-                    {/* Tool name above the image */}
-                    <Text type="label" color="primary">
-                      {tool.label}
-                    </Text>
+                    {/* Big bold title above image */}
+                    <span style={cardTitle}>{tool.label}</span>
 
-                    {/* Click image to open preview modal */}
-                    <AspectRatio ratio={4 / 5} style={galleryImageClip}>
+                    {/* Landscape compact image — 16:9 ratio */}
+                    <AspectRatio ratio={16 / 9} style={galleryImageClip}>
                       <img
                         style={galleryImage}
                         src={tool.src}
@@ -201,10 +249,8 @@ export default function LandingPage() {
                       />
                     </AspectRatio>
 
-                    {/* Standalone text link to the tool page */}
-                    <Link href={tool.href} isStandalone>
-                      {tool.label}
-                    </Link>
+                    {/* Tooltip link below */}
+                    <TooltipLink tool={tool} />
                   </VStack>
                 ))}
               </Grid>
@@ -213,7 +259,6 @@ export default function LandingPage() {
         }
       />
 
-      {/* Image preview modal */}
       {previewTool && (
         <ImageModal tool={previewTool} onClose={() => setPreviewTool(null)} />
       )}
