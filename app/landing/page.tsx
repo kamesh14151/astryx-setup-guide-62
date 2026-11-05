@@ -11,6 +11,7 @@ import {Grid} from '@astryxdesign/core/Grid';
 import {AspectRatio} from '@astryxdesign/core/AspectRatio';
 import {Link} from '@astryxdesign/core/Link';
 import {ArrowRightIcon} from '@heroicons/react/20/solid';
+import {ThemeToggle} from '@/components/theme-toggle';
 
 const TOOLS = [
   {
@@ -109,7 +110,11 @@ export default function LandingPage() {
   const [learnMoreTooltip, setLearnMoreTooltip] = useState(false);
 
   return (
-    <Layout
+    <>
+      <div className="fixed top-5 right-5 z-50">
+        <ThemeToggle />
+      </div>
+      <Layout
       content={
         <LayoutContent padding={6}>
           <VStack gap={10}>
@@ -180,5 +185,6 @@ export default function LandingPage() {
         </LayoutContent>
       }
     />
-  );
+  </>
+);
 }

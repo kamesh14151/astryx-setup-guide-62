@@ -6,6 +6,7 @@ import {Table} from '@astryxdesign/core/Table';
 import {SelectableCard} from '@astryxdesign/core/SelectableCard';
 import {Grid} from '@astryxdesign/core/Grid';
 import {Text} from '@astryxdesign/core/Text';
+import {ThemeToggle} from '@/components/theme-toggle';
 
 const SEMESTER_OPTIONS = [
   {id: '1', name: 'Semester 1', variant: 'blue' as const},
@@ -847,27 +848,30 @@ export default function GpaPage() {
             <span>Back to Hub</span>
           </Link>
 
-          <div className="flex rounded-xl bg-muted p-1">
-            <button
-              type="button"
-              onClick={() => setActiveTab('sgpa')}
-              className={`rounded-lg px-4 py-2 text-sm font-medium transition-colors ${
-                activeTab === 'sgpa'
-                  ? 'bg-foreground text-background shadow-sm'
-                  : 'text-muted-foreground hover:text-foreground'
-              }`}>
-              Semester SGPA
-            </button>
-            <button
-              type="button"
-              onClick={() => setActiveTab('cgpa')}
-              className={`rounded-lg px-4 py-2 text-sm font-medium transition-colors ${
-                activeTab === 'cgpa'
-                  ? 'bg-foreground text-background shadow-sm'
-                  : 'text-muted-foreground hover:text-foreground'
-              }`}>
-              Overall CGPA
-            </button>
+          <div className="flex items-center gap-3">
+            <div className="flex rounded-xl bg-muted p-1">
+              <button
+                type="button"
+                onClick={() => setActiveTab('sgpa')}
+                className={`rounded-lg px-4 py-2 text-sm font-medium transition-colors ${
+                  activeTab === 'sgpa'
+                    ? 'bg-foreground text-background shadow-sm'
+                    : 'text-muted-foreground hover:text-foreground'
+                }`}>
+                Semester SGPA
+              </button>
+              <button
+                type="button"
+                onClick={() => setActiveTab('cgpa')}
+                className={`rounded-lg px-4 py-2 text-sm font-medium transition-colors ${
+                  activeTab === 'cgpa'
+                    ? 'bg-foreground text-background shadow-sm'
+                    : 'text-muted-foreground hover:text-foreground'
+                }`}>
+                Overall CGPA
+              </button>
+            </div>
+            <ThemeToggle />
           </div>
         </header>
 
