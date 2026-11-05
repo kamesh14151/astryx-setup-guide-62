@@ -74,3 +74,4 @@ export function ThemeToggle({className = ''}: {className?: string}) {
 }
 
 export default ThemeToggle;
+

@@ -126,15 +126,16 @@ export default function LandingPage() {
                   type="display-2"
                   justify="center"
                   textWrap="balance">
-                  Little joys, everywhere you go
+                  <span className="text-foreground">Little joys, everywhere you go</span>
                 </Heading>
                 <Text
                   type="body"
                   color="secondary"
                   justify="center"
                   textWrap="balance">
-                  Sometimes all it takes is one small thing to turn your whole
-                  day around.
+                  <span className="text-muted-foreground">
+                    Sometimes all it takes is one small thing to turn your whole day around.
+                  </span>
                 </Text>
               </VStack>
               <HStack gap={3}>
@@ -170,7 +171,9 @@ export default function LandingPage() {
             <Grid columns={{minWidth: 240, repeat: 'fit'}} gap={6}>
               {TOOLS.map(tool => (
                 <VStack key={tool.href} gap={2}>
-                  <span style={cardTitle}>{tool.label}</span>
+                  <span className="text-lg font-bold tracking-tight text-foreground">
+                    {tool.label}
+                  </span>
 
                   {/* Plain image — no modal, no link */}
                   <AspectRatio ratio={16 / 9} style={galleryImageClip}>

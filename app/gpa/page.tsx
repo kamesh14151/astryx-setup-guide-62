@@ -910,7 +910,7 @@ export default function GpaPage() {
             {/* STEP 1: Department Selection */}
             <section className="flex flex-col gap-4">
               <div className="flex items-center justify-between">
-                <h2 className="text-lg font-semibold tracking-tight">1. Select Department</h2>
+                <h2 className="text-lg font-semibold tracking-tight text-foreground">1. Select Department</h2>
                 <span className="text-sm text-muted-foreground">{branchKeys.length} Departments</span>
               </div>
 
@@ -947,7 +947,7 @@ export default function GpaPage() {
             {/* STEP 2: Semester Selection */}
             <section className="flex flex-col gap-4">
               <div className="flex items-center justify-between">
-                <h2 className="text-lg font-semibold tracking-tight">2. Select Semester</h2>
+                <h2 className="text-lg font-semibold tracking-tight text-foreground">2. Select Semester</h2>
                 <span className="text-sm text-muted-foreground">
                   {activeDepartment.name} • Sem {selectedSemester}
                 </span>
@@ -971,9 +971,9 @@ export default function GpaPage() {
                         }
                       }}>
                       <div className="flex flex-col items-center justify-center py-1 text-center w-full">
-                        <Text type="body" weight="bold">
+                        <span className="font-bold text-sm text-foreground">
                           Sem {sem.id}
-                        </Text>
+                        </span>
                         <span className="text-[11px] text-muted-foreground mt-0.5">
                           {hasData ? `${subjects.length} courses` : 'Custom'}
                         </span>
@@ -988,7 +988,7 @@ export default function GpaPage() {
             <section className="flex flex-col gap-3">
               <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2.5">
                 <div className="flex items-center gap-2">
-                  <h2 className="text-base font-semibold tracking-tight">3. Assign Grades</h2>
+                  <h2 className="text-base font-semibold tracking-tight text-foreground">3. Assign Grades</h2>
                   <span className="rounded-full bg-muted px-2.5 py-0.5 text-xs font-medium text-muted-foreground">
                     {allCurrentSubjects.length} Courses • {calculation.totalCredits} Credits
                   </span>
@@ -1230,7 +1230,7 @@ export default function GpaPage() {
           <section className="flex flex-col gap-6 rounded-[20px] border border-border bg-card p-6 shadow-sm">
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 border-b border-border pb-6">
               <div>
-                <h2 className="text-xl font-semibold tracking-tight">Cumulative GPA (CGPA) Calculator</h2>
+                <h2 className="text-xl font-semibold tracking-tight text-foreground">Cumulative GPA (CGPA) Calculator</h2>
                 <p className="text-sm text-muted-foreground mt-1">
                   Enter your SGPA and total credits for each completed semester.
                 </p>
