@@ -71,19 +71,22 @@ const tooltipWrapper: CSSProperties = {
 
 const tooltipBubble: CSSProperties = {
   position: 'absolute',
-  bottom: 'calc(100% + 6px)',
+  bottom: 'calc(100% + 8px)',
   left: '50%',
   transform: 'translateX(-50%)',
   whiteSpace: 'nowrap',
-  backgroundColor: 'var(--color-surface-overlay, #1a1a1a)',
-  color: '#fff',
+  backgroundColor: '#262626',
+  color: '#ffffff',
+  border: '1px solid rgba(255, 255, 255, 0.20)',
+  boxShadow: '0 4px 16px rgba(0, 0, 0, 0.6)',
   fontSize: '0.75rem',
-  padding: '0.3rem 0.6rem',
-  borderRadius: '6px',
+  fontWeight: 500,
+  padding: '0.35rem 0.65rem',
+  borderRadius: '8px',
   pointerEvents: 'none',
   opacity: 0,
-  transition: 'opacity 0.15s ease',
-  zIndex: 10,
+  transition: 'opacity 0.15s ease, transform 0.15s ease',
+  zIndex: 50,
 };
 
 type Tool = (typeof TOOLS)[number];

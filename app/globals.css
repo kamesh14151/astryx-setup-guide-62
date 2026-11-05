@@ -178,6 +178,23 @@
   color: #f1f1f1 !important;
 }
 
+/* Tooltips in dark mode */
+.dark [role="tooltip"],
+.dark [data-tooltip],
+.dark [class*="tooltip"],
+.dark [class*="Tooltip"] {
+  background-color: #262626 !important;
+  color: #ffffff !important;
+  border: 1px solid rgba(255, 255, 255, 0.20) !important;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.6) !important;
+}
+
+.dark [role="tooltip"] *,
+.dark [class*="tooltip"] *,
+.dark [class*="Tooltip"] * {
+  color: #ffffff !important;
+}
+
 @media (prefers-color-scheme: dark) {
   :root:not(.light) {
     color-scheme: dark;
